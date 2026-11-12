@@ -285,3 +285,17 @@ test("표현 카드: 담으면 목록에 들어가고, 먼저 떠올린 결과�
   const p = Review.plan(Review.getCards());
   assert.equal(p.dueTotal, 2);                                               // 내일 둘 다 복습 차례
 });
+
+test("내 기록: 연속 공부일은 오늘(안 했으면 어제)부터 끊기지 않은 날 수", () => {
+  fresh("2026-11-10");
+  Review.markLoopStep("a/0", "listen");
+  setDate("2026-11-11");
+  Review.markLoopStep("a/0", "gist");
+  setDate("2026-11-12");
+  assert.equal(Review.loopStreak(), 2);              // 오늘은 아직 → 어제까지 2일
+  Review.markLoopStep("a/1", "listen");
+  assert.equal(Review.loopStreak(), 3);
+  setDate("2026-11-14");
+  assert.equal(Review.loopStreak(), 0);              // 하루 빠짐
+  assert.deepEqual(Object.keys(Review.getLoopLog()).sort(), ["2026-11-10", "2026-11-11", "2026-11-12"]);
+});

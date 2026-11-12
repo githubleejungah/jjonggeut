@@ -85,18 +85,23 @@ function contentCard(c) {
 const contentFinished = (c) => scenesDone(c) === c.scenes.length;
 const LIB_LEVEL_KEY = "jg:v1:ui:library-level";   // 고른 수준 필터 (이 기기에서만 기억하는 편의 기능)
 
-// 콘텐츠 고르기 (2026-11-12 개편): 과가 52개처럼 많아져도 한 화면에서 고르도록
-//   맨 위 '이어 하기' → 수준 필터 → 시리즈별 접는 묶음.
-//   과정(course)은 번호 칸 바둑판(한 줄 6~7칸), 모음(collection)은 제목 한 줄 목록.
+// 콘텐츠 고르기 (2026-11-12 개편, 같은 날 다듬음)
+//   기본: 시리즈 제목 아래에 콘텐츠 카드를 바로 펼친다. 접힌 묶음은 눌러야 열린다는 게 안 보여 어려웠다.
+//   콘텐츠가 많아지면(MANY 넘으면) 그때만: 수준 거르기, 묶음 접기(지금 하는 묶음만 펼침),
+//   한 시리즈가 BIG_SERIES 넘으면 카드 대신 번호 칸 바둑판(한 줄 6칸, 52과면 9줄) + '다음 과' 카드.
+//   '이어 하기'는 홈에 있으니 여기서는 보여 주지 않는다.
+const LIB_MANY = 12;
+const BIG_SERIES = 8;
 function renderLibrary() {
   renderTopbar(false);
   const all = sortedContents();
+  const many = all.length > LIB_MANY;
   const levels = LEVEL_ORDER.filter((l) => all.some((c) => c.level === l));
   let level = "all";
-  try { level = localStorage.getItem(LIB_LEVEL_KEY) ?? "all"; } catch { /* 저장소를 못 써도 화면은 그린다 */ }
-  if (level !== "all" && !levels.includes(level)) level = "all";
-
-  // 이어 하기: 가장 최근에 손댄, 아직 다 마치지 않은 콘텐츠
+  if (many) {
+    try { level = localStorage.getItem(LIB_LEVEL_KEY) ?? "all"; } catch { /* 저장소를 못 써도 화면은 그린다 */ }
+    if (level !== "all" && !levels.includes(level)) level = "all";
+  }
   const recent = all.filter((c) => !contentFinished(c)).map((c) => ({ c, last: lastTouched(c) })).filter((x) => x.last)
     .sort((a, b) => b.last.rec.updated_at.localeCompare(a.last.rec.updated_at))[0]?.c ?? null;
 
@@ -107,9 +112,9 @@ function renderLibrary() {
       .map((se) => ({ se, items: shown.filter((c) => (c.series ?? null) === se.id) }))
       .filter((g) => g.items.length);
     const openId = groups.find((g) => g.items.includes(recent))?.se.id ?? groups[0]?.se.id;
-    body.replaceChildren(...groups.map((g) => seriesGroup(g.se, g.items, g.se.id === openId, recent)));
+    body.replaceChildren(...groups.map((g) => seriesGroup(g.se, g.items, many ? g.se.id === openId : null)));
   };
-  const filter = levels.length > 1 && h("div", { class: "btn-row level-filter", role: "group", "aria-label": t("library.filter") },
+  const filter = many && levels.length > 1 && h("div", { class: "btn-row level-filter", role: "group", "aria-label": t("library.filter") },
     ["all", ...levels].map((l) => h("button", { class: "chip small", type: "button", "aria-pressed": String(l === level),
       onclick: (ev) => {
         level = l;
@@ -121,21 +126,20 @@ function renderLibrary() {
   app.replaceChildren(...[
     h("h2", {}, t("library.title")),
     h("p", { class: "muted small" }, t("library.desc")),
-    recent && h("p", { class: "small" }, h("b", {}, t("library.continue"))),
-    recent && contentCard(recent),
     filter,
     body,
     attributionNote(state.contents)].filter(Boolean));   // replaceChildren은 빈 값을 글자로 넣는다
 }
 
-function seriesGroup(se, items, open, recentId) {
+// 시리즈 한 묶음. open이 null이면 접지 않는 제목+목록, true/false면 접는 묶음
+function seriesGroup(se, items, open) {
   items = [...items].sort((a, b) => (a.series_no ?? 0) - (b.series_no ?? 0));
   const done = items.filter(contentFinished).length;
-  const levels = [...new Set(items.map((c) => c.level))];
-  const next = items.find((c) => !contentFinished(c));
-  const inner = se.kind === "course"
-    ? [next && next !== recentId && h("p", { class: "small muted next-label" }, t("library.next")),
-      next && next !== recentId && contentCard(next),
+  const head = [h("b", {}, se.title_ko), h("span", { class: "muted small" }, t("library.series.progress", { n: done, total: items.length }))];
+  let inner;
+  if (items.length > BIG_SERIES && se.kind === "course") {
+    const next = items.find((c) => !contentFinished(c));
+    inner = [next && h("p", { class: "small muted next-label" }, t("library.next")), next && contentCard(next),
       h("div", { class: "lesson-grid" }, items.map((c) => {
         const n = scenesDone(c);
         const started = n > 0 || lastTouched(c) !== null;
@@ -145,16 +149,15 @@ function seriesGroup(se, items, open, recentId) {
           contentFinished(c) && icon("check"),
           String(c.series_no),
           !contentFinished(c) && started && h("span", { class: "bar" }, h("i", { style: `width:${Math.round(n / c.scenes.length * 100)}%` })));
-      }))]
-    : items.map((c) => h("a", { class: "lesson-row", href: `#/loop/${c.id}/${firstOpenScene(c) + 1}` },
-        h("span", { class: "level-badge" }, c.level),
-        h("span", { class: "grow" }, h("b", {}, c.title_ko), h("span", { class: "content-en", lang: "en" }, c.title)),
-        contentFinished(c) ? icon("check") : h("span", { class: "muted small" }, `${scenesDone(c)}/${c.scenes.length}`)));
+      }))];
+  } else {
+    inner = h("div", { class: "content-list" }, items.map(contentCard));
+  }
+  if (open === null) {
+    return h("section", { class: "series-plain" }, h("h3", { class: "series-head" }, head), inner);
+  }
   return h("details", { class: "series", open },
-    h("summary", {},
-      h("b", {}, se.title_ko),
-      levels.map((l) => h("span", { class: "level-badge" }, l)),
-      h("span", { class: "muted small" }, t("library.series.progress", { n: done, total: items.length }))),
+    h("summary", {}, head),
     h("div", { class: "series-body" }, inner));
 }
 
@@ -212,6 +215,7 @@ function finishStep(c, sc, step) {
   const next = steps[steps.indexOf(step) + 1];
   const firstGoal = Review.goalMet(Review.getCards()) && Review.getSettings().celebrated_on !== Review.today();
   if (firstGoal) Review.setSettings({ celebrated_on: Review.today() });
+  celebrateNext = firstGoal;
   if (firstGoal || !next) location.hash = `#/done/${c.id}/${sc.k + 1}`;    // 하루 한 번 축하 (F-22)
   else location.hash = `#/loop/${c.id}/${sc.k + 1}/${next}`;
 }
@@ -584,6 +588,42 @@ function retellPanel(c, sc) {
 }
 
 /* ---------- 마침·축하 ---------- */
+// 하루 목표를 처음 이룬 순간에만 꽃가루가 터진다 (2026-11-12 사용자 제안). 새로고침하면 다시 나오지 않는다
+let celebrateNext = false;
+
+// 꽃가루: 토끼 뒤에서 두 번 '펑' 터져 천천히 떨어진다(약 2.5초). 그림 파일 없이 작은 도형만 쓴다.
+// 색은 테마 장미색 + 차분한 파스텔(노랑·세이지·하늘·살구), 모양은 동그라미·꽃잎·리본.
+// 움직임 줄이기 설정이면 띄우지 않는다. 화면 읽기 프로그램은 무시한다(aria-hidden).
+function confetti(anchor) {
+  if (!anchor || matchMedia("(prefers-reduced-motion: reduce)").matches || !Element.prototype.animate) return;
+  const r = anchor.getBoundingClientRect();
+  const x0 = r.left + r.width / 2, y0 = r.top + r.height * 0.45;
+  const layer = h("div", { class: "confetti", "aria-hidden": "true" });
+  const colors = ["var(--accent)", "var(--pen)", "#9cc3ae", "#9cc0e6", "#f2c4a4"];
+  const shapes = ["dot", "petal", "ribbon"];
+  const burst = (n, delay, power) => {
+    for (let i = 0; i < n; i++) {
+      const piece = h("i", { class: `cf ${shapes[i % shapes.length]}`,
+        style: `left:${x0}px;top:${y0}px;background:${colors[i % colors.length]}` });
+      layer.append(piece);
+      const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;   // 위쪽 부채꼴
+      const dist = power * (0.55 + Math.random() * 0.45);
+      const dx = Math.cos(angle) * dist, dy = Math.sin(angle) * dist;
+      const fall = 160 + Math.random() * 140, drift = (Math.random() - 0.5) * 60;
+      const spin = (Math.random() - 0.5) * 720;
+      piece.animate([
+        { transform: "translate(-50%, -50%) scale(0.4) rotate(0deg)", opacity: 0 },
+        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) scale(1) rotate(${spin * 0.4}deg)`, opacity: 1, offset: 0.28 },
+        { transform: `translate(calc(-50% + ${dx + drift}px), calc(-50% + ${dy + fall}px)) scale(0.9) rotate(${spin}deg)`, opacity: 0 },
+      ], { duration: 2200 + Math.random() * 700, delay, easing: "cubic-bezier(.15,.7,.35,1)", fill: "both" });
+    }
+  };
+  burst(26, 120, 150);
+  burst(16, 520, 110);
+  document.body.append(layer);
+  setTimeout(() => layer.remove(), 3800);
+}
+
 function renderDone(id, sceneNo) {
   renderTopbar(false);
   const c = contentById(id);
@@ -591,9 +631,13 @@ function renderDone(id, sceneNo) {
   const todayScenes = Object.keys(Review.loopToday()).length;
   const k = (Number(sceneNo) || 1) - 1;
   const nextScene = c && k + 1 < c.scenes.length ? k + 2 : null;
+  const rabbit = h("img", { src: "img/rabbit.svg", alt: "", class: "rabbit-big bounce" });
+  const party = celebrateNext && met;
+  celebrateNext = false;
+  if (party) requestAnimationFrame(() => confetti(rabbit));
   app.replaceChildren(
     h("section", { class: "card welcome" },
-      h("img", { src: "img/rabbit.svg", alt: "", class: "rabbit-big bounce" }),
+      rabbit,
       h("h2", {}, t(met ? "done.goal" : "done.step")),
       h("p", {}, t(met ? "done.goal.desc" : "done.step.desc")),
       h("p", { class: "muted small" }, t("done.today", { n: todayScenes }))),

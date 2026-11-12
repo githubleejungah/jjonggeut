@@ -414,3 +414,32 @@ details.series > summary:focus-visible { outline: 2px solid var(--accent); outli
 .lesson-row:first-child { border-top: 0; }
 .lesson-row .grow { flex: 1; min-width: 0; display: grid; }
 .lesson-row .grow > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 내 기록 (2026-11-12) */
+.stat-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 10px 0 14px; }
+.stat { display: grid; gap: 2px; padding: 12px 8px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); text-align: center; }
+.stat-num { font-size: 1.3rem; font-weight: 800; color: var(--accent-ink); }
+.cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; text-align: center; }
+.cal-head { font-size: 0.78rem; color: var(--muted); padding: 2px 0; }
+.cal-day { position: relative; display: grid; place-items: center; aspect-ratio: 1; border-radius: 10px; font-size: 0.9rem; }
+.cal-day.on { background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+.cal-day.on .icon { position: absolute; right: 2px; bottom: 2px; width: 10px; height: 10px; stroke-width: 3; }
+.cal-day.today { outline: 2px solid var(--accent); outline-offset: -2px; }
+.progress-line { display: grid; gap: 6px; padding: 8px 0; color: inherit; text-decoration: none; border-top: 1px solid var(--border); }
+.progress-line:first-of-type { border-top: 0; }
+.gist-line { padding: 8px 0; border-top: 1px solid var(--border); }
+.gist-line:first-of-type { border-top: 0; }
+.gist-line p { margin: 0 0 2px; }
+.card-list { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; }
+.card-list li { display: grid; gap: 2px; }
+
+/* 축하 꽃가루 (2026-11-12): 화면 위에 겹치고 누르기를 막지 않는다 */
+.confetti { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 50; }
+.cf { position: absolute; display: block; opacity: 0; }
+.cf.dot { width: 7px; height: 7px; border-radius: 50%; }
+.cf.petal { width: 9px; height: 6px; border-radius: 80% 0 80% 0; }      /* 꽃잎 */
+.cf.ribbon { width: 4px; height: 11px; border-radius: 2px; }
+.series-plain { margin: 16px 0 6px; }
+.series-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin: 0 0 6px; font-size: 1rem; }
+.series-plain .content-list { margin-top: 4px; }

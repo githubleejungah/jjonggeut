@@ -313,6 +313,17 @@ const Review = (() => {
   }
 
   function loopToday() { return read("looplog", {})[today()] ?? {}; }
+  function getLoopLog() { return read("looplog", {}); }
+
+  // 연속 공부일: 오늘(아직 안 했으면 어제)부터 거꾸로, 루프를 한 단계 이상 한 날이 끊기지 않은 수
+  function loopStreak() {
+    const log = getLoopLog();
+    const did = (d) => Object.values(log[d] ?? {}).some((steps) => steps.length > 0);
+    let n = 0;
+    let d = did(today()) ? today() : addDays(today(), -1);
+    while (did(d)) { n += 1; d = addDays(d, -1); }
+    return n;
+  }
 
   // ----- 표현 카드 (F-09, 2026-11-12) -----
   // jg:v1:cards = [{ id, content_id, expr, text, added_at, sentence? }]  내가 모은 표현 카드 목록
@@ -442,7 +453,7 @@ const Review = (() => {
     classify, nextBox, intervalFor, record, get, getToday, getSettings, setSettings,
     plan, counts, makeQuiz, today, addDays, useStore, useClock,
     getLog, ensureLog, stats, exportAll, importAll, planWrap, practice, markWrapped,
-    getLoop, saveLoop, markLoopStep, loopToday, goalMet, LOOP_STEPS,
+    getLoop, saveLoop, markLoopStep, loopToday, getLoopLog, loopStreak, goalMet, LOOP_STEPS,
     getCards, hasCard, addCard,
     INTERVALS, MAINTAIN_BOX,
   };

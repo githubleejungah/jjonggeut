@@ -333,9 +333,79 @@ function renderHome() {
 }
 
 /* ---------- 화면 2: 내 기록 (6단계에서 채운다) ---------- */
+// 내 기록 (2026-11-12): 저장된 기록으로만 그린다 (화면 값이 아니라 저장소가 기준)
+let progressMonth = null;   // 달력에 보이는 달 "YYYY-MM"
 function renderProgress() {
   renderTopbar(false);
-  app.replaceChildren(h("h2", {}, t("progress.title")), h("p", { class: "muted" }, t("progress.soon")));
+  const log = Review.getLoopLog();
+  const days = Object.keys(log).filter((d) => Object.values(log[d]).some((s) => s.length)).sort();
+  const cards = Review.getCards();
+  const contents = state.contents.filter((c) => c.reviewed);
+  const touched = contents.filter((c) => c.scenes.some((_, k) => Review.getLoop(sceneKey(c, k)).updated_at));
+  if (!days.length && !cards.length) {
+    app.replaceChildren(h("h2", {}, t("progress.title")), h("p", { class: "muted" }, t("progress.empty")),
+      h("a", { class: "btn primary wide", href: "#/library" }, t("home.start")));
+    return;
+  }
+  const stat = (label, value) => h("div", { class: "stat" }, h("span", { class: "stat-num" }, value), h("span", { class: "muted small" }, label));
+
+  // 달력: 공부한 날은 바탕색 + 체크 모양 (색만으로 구분하지 않기)
+  const studied = new Set(days);
+  progressMonth ??= Review.today().slice(0, 7);
+  const cal = h("div", {});
+  const drawCal = () => {
+    const [y, m] = progressMonth.split("-").map(Number);
+    const first = new Date(y, m - 1, 1).getDay();
+    const count = new Date(y, m, 0).getDate();
+    const cells = t("progress.weekdays").split(",").map((w) => h("span", { class: "cal-head" }, w));
+    for (let i = 0; i < first; i++) cells.push(h("span", {}));
+    for (let d = 1; d <= count; d++) {
+      const iso = `${progressMonth}-${String(d).padStart(2, "0")}`;
+      const on = studied.has(iso);
+      cells.push(h("span", { class: `cal-day${on ? " on" : ""}${iso === Review.today() ? " today" : ""}`,
+        "aria-label": on ? t("progress.day.done", { d }) : null }, String(d), on && icon("check")));
+    }
+    const shift = (n) => () => {
+      const dt = new Date(y, m - 1 + n, 1);
+      progressMonth = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, "0")}`;
+      drawCal();
+    };
+    cal.replaceChildren(
+      h("div", { class: "cal-nav" },
+        h("button", { class: "icon-btn", type: "button", "aria-label": t("progress.prev"), onclick: shift(-1) }, "‹"),
+        h("b", {}, t("progress.month", { y, m })),
+        h("button", { class: "icon-btn", type: "button", "aria-label": t("progress.next"), onclick: shift(1) }, "›")),
+      h("div", { class: "cal-grid" }, cells));
+  };
+  drawCal();
+
+  const gists = touched.flatMap((c) => c.scenes.map((_, k) => ({ c, k, rec: Review.getLoop(sceneKey(c, k)) })))
+    .filter((x) => x.rec.gist?.trim())
+    .sort((a, b) => b.rec.updated_at.localeCompare(a.rec.updated_at)).slice(0, 5);
+  const recentCards = [...cards].reverse().slice(0, 10);
+
+  app.replaceChildren(...[
+    h("h2", {}, t("progress.title")),
+    h("div", { class: "stat-row" },
+      stat(t("progress.days"), t("progress.unit.day", { n: days.length })),
+      stat(t("progress.streak"), t("progress.unit.day", { n: Review.loopStreak() })),
+      stat(t("progress.cards"), t("progress.unit.card", { n: cards.length }))),
+    h("section", { class: "card" }, h("h3", {}, t("progress.calendar")), cal),
+    touched.length > 0 && h("section", { class: "card" }, h("h3", {}, t("progress.scenes")),
+      touched.map((c) => h("a", { class: "progress-line", href: `#/loop/${c.id}/${firstOpenScene(c) + 1}` },
+        h("span", {}, h("b", {}, c.title_ko), " ",
+          h("span", { class: "muted small" }, t("progress.scene.line", { n: scenesDone(c), total: c.scenes.length }))),
+        h("span", { class: "progress-bar" }, h("span", { style: `width:${Math.round(scenesDone(c) / c.scenes.length * 100)}%` }))))),
+    gists.length > 0 && h("section", { class: "card" }, h("h3", {}, t("progress.gists")),
+      gists.map((g) => h("div", { class: "gist-line" },
+        h("p", {}, g.rec.gist),
+        h("p", { class: "muted small" }, t("progress.gist.where", { title: g.c.title_ko, k: g.k + 1, date: g.rec.updated_at }))))),
+    recentCards.length > 0 && h("section", { class: "card" }, h("h3", {}, t("progress.recent.cards")),
+      h("ul", { class: "card-list" }, recentCards.map((c) => h("li", {},
+        h("b", { lang: "en" }, c.text),
+        c.mine && h("span", { class: "muted small" }, t("progress.mine"), " ", h("span", { lang: "en" }, c.mine)))))),
+    h("p", { class: "muted small" }, t("progress.recording")),
+  ].filter(Boolean));
 }
 
 /* ---------- 화면 3: 정보 · 소리 확인 · 백업 ---------- */
@@ -436,7 +506,7 @@ function inAppNotice() {
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
 const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url} ${r.status}`); return r.json(); });
-Promise.all([getJSON("i18n/ko.json?v=2026111217"), getJSON("data/contents.json?v=2026111217")])
+Promise.all([getJSON("i18n/ko.json?v=2026111219"), getJSON("data/contents.json?v=2026111219")])
   .then(([text, data]) => {
     state.text = text;
     state.contents = data.contents ?? [];
