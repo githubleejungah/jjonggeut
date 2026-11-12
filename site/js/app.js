@@ -435,7 +435,23 @@ function renderProgress() {
   const gists = touched.flatMap((c) => c.scenes.map((_, k) => ({ c, k, rec: Review.getLoop(sceneKey(c, k)) })))
     .filter((x) => x.rec.gist?.trim())
     .sort((a, b) => b.rec.updated_at.localeCompare(a.rec.updated_at)).slice(0, 5);
-  const recentCards = [...cards].reverse().slice(0, 10);
+  // 모은 표현은 담은 날짜별로 묶는다. 오늘은 펼치고, 지난 날은 접어 둔다 (2026-11-12 사용자 제안)
+  const byDay = new Map();
+  for (const card of [...cards].reverse()) {
+    const day = card.added_at ?? "";
+    if (!byDay.has(day)) byDay.set(day, []);
+    byDay.get(day).push(card);
+  }
+  const dayLabel = (d) => (d === Review.today() ? t("progress.today")
+    : t("progress.date", { m: Number(d.slice(5, 7)), d: Number(d.slice(8, 10)) }));
+  const cardItem = (c) => h("li", {},
+    h("b", { lang: "en" }, c.text),
+    cardMeaning(c) && h("span", { class: "small" }, t("progress.meaning"), " ", cardMeaning(c)),
+    c.mine && h("span", { class: "muted small" }, t("progress.mine"), " ", h("span", { lang: "en" }, c.mine)));
+  const cardsSection = cards.length > 0 && h("section", { class: "card", id: "my-cards" }, h("h3", {}, t("progress.recent.cards")),
+    [...byDay].map(([day, list]) => h("details", { class: "day-group", open: day === Review.today() || byDay.size === 1 },
+      h("summary", {}, h("b", {}, dayLabel(day)), " ", h("span", { class: "muted small" }, t("progress.unit.card", { n: list.length }))),
+      h("ul", { class: "card-list" }, list.map(cardItem)))));
   const retells = touched.flatMap((c) => c.scenes.map((_, k) => ({ c, k, rec: Review.getLoop(sceneKey(c, k)) })))
     .filter((x) => x.rec.retell_text?.trim())
     .sort((a, b) => b.rec.updated_at.localeCompare(a.rec.updated_at)).slice(0, 5);
@@ -445,7 +461,12 @@ function renderProgress() {
     h("div", { class: "stat-row" },
       stat(t("progress.days"), t("progress.unit.day", { n: days.length })),
       stat(t("progress.streak"), t("progress.unit.day", { n: Review.loopStreak() })),
-      stat(t("progress.cards"), t("progress.unit.card", { n: cards.length }))),
+      cards.length > 0
+        ? h("a", { class: "stat stat-link", href: "#/progress", onclick: (ev) => {     // 누르면 모은 표현으로 내려간다
+            ev.preventDefault();
+            document.getElementById("my-cards")?.scrollIntoView({ behavior: "smooth", block: "start" });
+          } }, h("span", { class: "stat-num" }, t("progress.unit.card", { n: cards.length })), h("span", { class: "muted small" }, t("progress.cards")))
+        : stat(t("progress.cards"), t("progress.unit.card", { n: 0 }))),
     h("section", { class: "card" }, h("h3", {}, t("progress.calendar")), cal),
     touched.length > 0 && h("section", { class: "card" }, h("h3", {}, t("progress.scenes")),
       touched.map((c) => h("a", { class: "progress-line", href: `#/loop/${c.id}/${firstOpenScene(c) + 1}` },
@@ -460,11 +481,7 @@ function renderProgress() {
       retells.map((g) => h("div", { class: "gist-line" },
         h("p", { lang: "en" }, g.rec.retell_text),
         h("p", { class: "muted small" }, t("progress.gist.where", { title: g.c.title_ko, k: g.k + 1, date: g.rec.updated_at }))))),
-    recentCards.length > 0 && h("section", { class: "card" }, h("h3", {}, t("progress.recent.cards")),
-      h("ul", { class: "card-list" }, recentCards.map((c) => h("li", {},
-        h("b", { lang: "en" }, c.text),
-        cardMeaning(c) && h("span", { class: "small" }, t("progress.meaning"), " ", cardMeaning(c)),
-        c.mine && h("span", { class: "muted small" }, t("progress.mine"), " ", h("span", { lang: "en" }, c.mine)))))),
+    cardsSection,
     h("p", { class: "muted small" }, t("progress.recording")),
   ].filter(Boolean));
 }
@@ -577,7 +594,7 @@ function inAppNotice() {
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
 const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url} ${r.status}`); return r.json(); });
-Promise.all([getJSON("i18n/ko.json?v=2026111222"), getJSON("data/contents.json?v=2026111222")])
+Promise.all([getJSON("i18n/ko.json?v=2026111224"), getJSON("data/contents.json?v=2026111222")])
   .then(([text, data]) => {
     state.text = text;
     state.contents = data.contents ?? [];

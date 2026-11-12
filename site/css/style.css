@@ -474,3 +474,21 @@ details.series > summary:focus-visible { outline: 2px solid var(--accent); outli
 .retell-box .tips { margin: 4px 0 10px; }
 .retell-write { margin: 10px 0; }
 .retell-write summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--accent-ink); font-weight: 600; }
+
+/* 이 문장 듣기 (2026-11-12): 글자만 있으면 작아 보여 누를 수 있는 모양으로 */
+.play-pill {
+  justify-self: start; display: inline-flex; align-items: center; gap: 6px; margin-top: 6px;
+  min-height: 36px; padding: 4px 14px; border-radius: 999px; border: 1px solid var(--accent);
+  color: var(--accent-ink); background: var(--accent-soft); font-size: 0.92rem; font-weight: 700;
+}
+.play-pill .icon { width: 16px; height: 16px; }
+.expr-echo { display: block; font-size: 1rem; font-weight: 800; color: var(--accent-ink); margin-bottom: 2px; }
+.back-bar { margin: 0 0 12px; }
+
+/* 내 기록: 모은 표현 날짜별 (2026-11-12) */
+.stat-link { color: inherit; text-decoration: none; border-color: var(--accent); }
+.stat-link .muted { text-decoration: underline; text-underline-offset: 3px; }
+.day-group { border-top: 1px solid var(--border); padding: 4px 0; }
+.day-group:first-of-type { border-top: 0; }
+.day-group > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 6px; }
+.day-group .card-list { margin: 4px 0 10px; }

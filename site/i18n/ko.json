@@ -194,7 +194,7 @@
   "progress.scene.line": "{n}/{total}장면 마침",
   "progress.gists": "내가 적은 요지",
   "progress.gist.where": "{title} · 장면 {k} · {date}",
-  "progress.recent.cards": "최근 모은 표현",
+  "progress.recent.cards": "모은 표현",
   "progress.mine": "내 문장:",
   "progress.recording": "녹음은 아직 기기에 오래 남지 않아요. 화면을 떠나면 사라져요.",
   "rabbit.alt": "귀가 작은 통통한 토끼",
@@ -308,5 +308,8 @@
   "progress.meaning": "뜻:",
   "story.again": "토끼 이야기 다시 보기",
   "story.again.desc": "처음 시작할 때 본 소리 확인 · 색 고르기",
-  "story.done": "다 봤어요"
+  "story.done": "다 봤어요",
+  "loop.back.to": "'{step}'로 돌아가기",
+  "progress.today": "오늘",
+  "progress.date": "{m}월 {d}일"
 }

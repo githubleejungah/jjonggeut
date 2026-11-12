@@ -25,7 +25,8 @@ const Recorder = (() => {
 
   async function start() {
     if (why()) throw new Error(why());
-    stream ??= await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    // 자동 음량 조절을 켜 달라고 한다 (휴대폰 마이크는 작게 녹음되는 일이 많다)
+    stream ??= await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
     const type = TYPES.find((t) => MediaRecorder.isTypeSupported?.(t));
     rec = new MediaRecorder(stream, type ? { mimeType: type } : undefined);
     chunks = [];
@@ -42,12 +43,50 @@ const Recorder = (() => {
         const blob = new Blob(chunks, { type: rec.mimeType || "audio/webm" });
         const old = clips.get(name);
         if (old) URL.revokeObjectURL(old.url);
-        const clip = { url: URL.createObjectURL(blob), ms: Date.now() - rec.startedAt };
+        const clip = { url: URL.createObjectURL(blob), blob, ms: Date.now() - rec.startedAt };
         clips.set(name, clip);
+        // 녹음이 끝나면 마이크를 바로 끈다 (2026-11-12). 안드로이드 크롬은 마이크가 켜져 있는 동안
+        // 소리를 '통화 모드'로 작게 내서, 내 녹음이 잘 안 들렸다
+        stream?.getTracks().forEach((t) => t.stop());
+        stream = null;
         resolve(clip);
       };
       rec.stop();
     });
+  }
+
+  // 내 녹음 듣기: 가장 큰 소리가 0.9가 되도록 키워서(최대 8배) 들려준다. 작게 녹음돼도 또렷하게.
+  // Web Audio를 못 쓰면 그냥 재생한다.
+  let ctx = null;
+  let playing = null;
+  async function play(name) {
+    const clip = clips.get(name);
+    if (!clip) return;
+    playing?.stop?.();
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) { const a = new Audio(clip.url); a.play(); playing = { stop: () => a.pause() }; return; }
+    try {
+      ctx ??= new AC();
+      if (ctx.state === "suspended") await ctx.resume();
+      if (!clip.buffer) {
+        clip.buffer = await ctx.decodeAudioData(await clip.blob.arrayBuffer());
+        let peak = 0;
+        for (let ch = 0; ch < clip.buffer.numberOfChannels; ch++) {
+          const d = clip.buffer.getChannelData(ch);
+          for (let i = 0; i < d.length; i += 4) peak = Math.max(peak, Math.abs(d[i]));
+        }
+        clip.gain = peak > 0 ? Math.min(8, Math.max(1, 0.9 / peak)) : 1;
+      }
+      const src = ctx.createBufferSource();
+      const g = ctx.createGain();
+      src.buffer = clip.buffer;
+      g.gain.value = clip.gain;
+      src.connect(g).connect(ctx.destination);
+      src.start();
+      playing = { stop: () => { try { src.stop(); } catch { /* 이미 끝남 */ } } };
+    } catch {
+      const a = new Audio(clip.url); a.play(); playing = { stop: () => a.pause() };
+    }
   }
 
   const recording = () => rec?.state === "recording";
@@ -62,5 +101,5 @@ const Recorder = (() => {
     clips.clear();
   }
 
-  return { why, start, stop, recording, get, release };
+  return { why, start, stop, recording, get, release, play };
 })();

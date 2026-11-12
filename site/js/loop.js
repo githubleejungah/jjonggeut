@@ -197,13 +197,17 @@ function renderLoop(id, sceneNo, step) {
         h("span", { class: "step-name" }, t(`loop.${s}`))))));
 
   const panels = { listen: listenPanel, gist: gistPanel, read: readPanel, chunk: chunkPanel, shadow: shadowPanel, retell: retellPanel };
+  // 다른 단계에서 잠깐 보러 왔으면(예: 다시 말하기 → 대본) 돌아가는 버튼을 위에 둔다
+  if (loopReturn && (loopReturn.id !== c.id || loopReturn.k !== k || loopReturn.step === current)) loopReturn = null;
+  const backBar = loopReturn && h("a", { class: "btn soft wide back-bar", href: `${base}/${loopReturn.step}`,
+    onclick: () => { loopReturn = null; } }, ...withIcon("back", t("loop.back.to", { step: t(`loop.${loopReturn.step}`) })));
   app.replaceChildren(
     h("p", { class: "loop-title" }, h("span", { class: "level-badge" }, c.level), " ", c.title_ko),
     h("p", { class: "muted small scene-label" },
       t("loop.scene", { k: k + 1, n: c.scenes.length, s: Math.round((sc.end - sc.start) / 1000) })),
     scenePicker,
     stepper,
-    h("section", { class: "card loop-panel" }, panels[current](c, sc)),
+    h("section", { class: "card loop-panel" }, backBar, panels[current](c, sc)),
     h("p", { class: "muted small attribution" },
       licenseOf(c)?.attribution, " · ", h("a", { href: c.source_url, target: "_blank", rel: "noopener" }, t("loop.source"))));
 }
@@ -463,7 +467,7 @@ function chunkPanel(c, sc) {
 
     // h()로 감싸야 목록(배열)과 빈 값(false)이 알맞게 처리된다 (append는 배열을 글자로 바꿔 버린다)
     reveal.append(h("div", {},
-      h("p", { class: "expr-meaning" }, h("span", { class: "pen" }, e.meaning_ko)),
+      h("p", { class: "expr-meaning" }, h("span", { class: "expr-echo", lang: "en" }, e.text), " ", h("span", { class: "pen" }, e.meaning_ko)),
       h("p", { class: "expr-sent-ko" }, h("span", { class: "muted small" }, t("expr.sent.ko")), " ", s.ko),
       h("p", { class: "expr-note" }, e.note_ko),
       e.similar?.length > 0 && h("p", { class: "muted small" }, t("expr.similar"), " ", h("span", { lang: "en" }, e.similar.join(", "))),
@@ -485,7 +489,7 @@ function chunkPanel(c, sc) {
         h("button", { class: "sent-play", type: "button", onclick: () => p.playSentences(c.sentences, [e.sentence]) },
           s.speaker && h("span", { class: "speaker" }, s.speaker),
           h("span", { class: "sent-en", lang: "en" }, ...markText(s.en, e.match)),
-          h("span", { class: "muted small" }, icon("play"), " ", t("loop.play.one")))),
+          h("span", { class: "play-pill" }, icon("play"), t("loop.play.one")))),
       h("p", { class: "expr-ask" }, t("expr.ask")),
       revealBtn, reveal, save);
   };
@@ -543,8 +547,8 @@ function shadowPanel(c, sc) {
       draw();
     };
     // 내 녹음 듣기 / 원음과 동시에 듣기 (차이를 귀로 비교)
-    mine.onclick = () => { p.stop(); new Audio(Recorder.get(name).url).play(); };
-    both.onclick = () => { new Audio(Recorder.get(name).url).play(); p.playSentences(c.sentences, [i]); };
+    mine.onclick = () => { p.stop(); Recorder.play(name); };
+    both.onclick = () => { Recorder.play(name); p.playSentences(c.sentences, [i]); };
     draw();
     return h("span", { class: "rec-tools" }, recBtn, mine, both);
   };
@@ -562,6 +566,8 @@ function shadowPanel(c, sc) {
   ];
 }
 
+let loopReturn = null;      // { id, k, step }: 잠깐 보러 간 곳에서 돌아갈 단계
+
 /* 6. 다시 말하기 (F-11, 2026-11-12 보강)
    들은 장면을 내 말로 다시 말한다(출력 연습). 순서: 말 틀(시작 문장) → 이 장면 표현 → 1분 말하기 → 스스로 점검.
    녹음은 https에서만 된다. 안 되는 곳에서는 1분 타이머만 쓰고 말로 하거나, 글로 써도 된다(쓴 글은 내 기록에 남는다). */
@@ -575,7 +581,7 @@ function retellPanel(c, sc) {
   const name = `${c.id}:retell:${sc.k}`;
   const status = h("p", { class: "info-line center", "aria-live": "polite" });
   const play = h("button", { class: "btn", type: "button", disabled: true,
-    onclick: () => new Audio(Recorder.get(name).url).play() }, ...withIcon("user", t("loop.mine")));
+    onclick: () => Recorder.play(name) }, ...withIcon("user", t("loop.mine")));
   let timer = null;
   const recBtn = h("button", { class: "btn soft big", type: "button" });
   const draw = () => recBtn.replaceChildren(...withIcon(Recorder.recording() ? "stop" : "mic",
@@ -642,7 +648,8 @@ function retellPanel(c, sc) {
     h("details", { class: "retell-write" }, h("summary", {}, t("loop.retell.write")), written),
     h("p", { class: "small" }, h("b", {}, t("loop.retell.check"))),
     checkBox,
-    h("a", { class: "small", href: `#/loop/${c.id}/${sc.k + 1}/read` }, t("loop.retell.peek")),
+    h("a", { class: "small", href: `#/loop/${c.id}/${sc.k + 1}/read`,
+      onclick: () => { loopReturn = { id: c.id, k: sc.k, step: "retell" }; } }, t("loop.retell.peek")),
     nextButton(c, sc, "retell", "loop.finish"),
   ];
 }
