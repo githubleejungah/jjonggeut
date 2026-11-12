@@ -10,6 +10,7 @@
   5. index.html이 부르는 파일마다 캐시 버스팅 번호(?v=)가 붙어 있는지
   6. 화면 파일에 이모지가 없는지 (디자인 규칙: 이모지 대신 선 아이콘)
   7. 비밀 값처럼 보이는 글자가 없는지
+  8. 콘텐츠 데이터 검사 (validate.py: 라이선스 없는 콘텐츠 차단, 문장 시각) + 그 시험 (unittest)
 
 통과하면 0, 하나라도 실패하면 1로 끝난다 (GitHub Actions가 배포를 멈춘다).
 """
@@ -41,6 +42,12 @@ tests = sorted(str(p.relative_to(ROOT)) for p in (ROOT / "tests").glob("*.test.j
 r = run(["node", "--test", *tests])
 summary = " ".join(l for l in r.stdout.splitlines() if l.startswith(("ℹ pass", "ℹ fail")))
 check("학습 규칙·음성 시험", r.returncode == 0, summary or r.stderr[-500:])
+
+# 8. 콘텐츠 데이터 (앞쪽에서 돌려 실패를 빨리 보이게 한다)
+r = run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-p", "test_*.py"])
+check("콘텐츠 검사 시험", r.returncode == 0, r.stderr[-500:])
+r = run([sys.executable, "pipeline/validate.py"])
+check("콘텐츠 데이터", r.returncode == 0, r.stdout[-800:])
 
 js_files = sorted(SITE.glob("js/*.js"))
 

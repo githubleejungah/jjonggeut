@@ -1,0 +1,6 @@
+# 문장 시각 맞추기(align.py)에만 필요하다. 앱(site/)과 점검(check.py)은 표준 라이브러리만 쓴다.
+# 설치 (파이썬 3.13 권장, 3.15에는 부품 설치 파일이 없다):
+#   py -3.13 -m venv .venv
+#   .venv\Scripts\python.exe -m pip install -r pipeline/requirements-align.txt
+# 참고: faster-whisper 1.2.1의 기본 디코더는 av 15 이상과 맞지 않아 align.py가 av로 직접 푼다.
+faster-whisper==1.2.1

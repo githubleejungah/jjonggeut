@@ -184,16 +184,31 @@ function themePicker() {
 
 /* ---------- 소리 확인 (처음 시작 화면과 정보 화면이 함께 쓴다) ---------- */
 // 문장마다 언어를 정해서 넘긴다 (영어는 영어 음성, 한국어는 한국어 음성)
-function soundTestButton() {
-  const parts = () => [
-    { text: t("about.test.en"), lang: "en-US" },
-    { pause: 600 },
-    { text: t("about.test.ko"), lang: "ko-KR" },
-  ];
-  const btn = h("button", { class: "btn soft", type: "button", onclick: () => speech.toggle("test", parts) });
+const SHORT_TEST = [
+  { key: "about.test.en", lang: "en-US" },
+  { pause: 600 },
+  { key: "about.test.ko", lang: "ko-KR" },
+];
+
+// 처음 만날 때 들려주는 토끼 이야기 (2026-11-12): 먹는 걸 좋아해서 귀로 갈 살이 볼로 갔다.
+// 소리 확인을 겸한다: 영어와 한국어 음성이 둘 다 나오는지 이 이야기로 확인한다.
+// 마지막에 영어 표현 "I'm all ears"(귀 기울여 듣고 있어요)를 하나 배운다.
+const RABBIT_STORY = [
+  { key: "story.1", lang: "en-US" },
+  { key: "story.2", lang: "ko-KR" },
+  { key: "story.3", lang: "ko-KR" },
+  { key: "story.4", lang: "ko-KR" },
+  { pause: 400 },
+  { key: "story.5", lang: "en-US" },
+  { key: "story.6", lang: "ko-KR" },
+];
+
+function soundTestButton(script = SHORT_TEST, labelKey = "about.voice.test") {
+  const parts = () => script.map((p) => (p.pause ? p : { text: t(p.key), lang: p.lang, sec: p.key }));
+  const btn = h("button", { class: "btn soft", type: "button", onclick: () => speech.toggle(labelKey, parts) });
   const draw = () => {
-    const playing = speech.owner === "test" && speech.status === "playing";
-    btn.replaceChildren(...withIcon(playing ? "stop" : "speaker", t(playing ? "about.voice.stop" : "about.voice.test")));
+    const playing = speech.owner === labelKey && speech.status === "playing";
+    btn.replaceChildren(...withIcon(playing ? "stop" : "speaker", t(playing ? "about.voice.stop" : labelKey)));
   };
   speech.listeners.add(draw);
   draw();
@@ -210,13 +225,19 @@ function renderWelcome(step = 1) {
   renderTopbar(true);
   if (step === 1) {
     const tips = h("div", { hidden: true }, soundTips());
+    // 이야기 말풍선: 읽는 줄을 색칠해서 어디를 듣고 있는지 보이게 한다
+    const lines = RABBIT_STORY.filter((p) => p.key).map((p) =>
+      h("p", { class: `story-line${p.lang.startsWith("en") ? " en" : ""}`, "data-sec": p.key, lang: p.lang.slice(0, 2) }, t(p.key)));
+    speech.onSentence = (p) => lines.forEach((el) => el.classList.toggle("reading", el.dataset.sec === p.sec));
+    speech.listeners.add(() => { if (speech.status === "idle") lines.forEach((el) => el.classList.remove("reading")); });
     app.replaceChildren(
       h("p", { class: "step-label" }, t("welcome.step", { n: 1, total: 2 })),
       h("section", { class: "card welcome" },
         h("img", { src: "img/rabbit.svg", alt: "", class: "rabbit-big" }),
         h("h2", {}, t("welcome.sound.title")),
-        h("p", {}, t("welcome.sound.desc")),
-        speech.supported ? soundTestButton() : h("p", { class: "warn-line" }, t("about.voice.unsupported")),
+        h("p", { class: "muted small" }, t("welcome.sound.desc")),
+        h("div", { class: "story" }, lines),
+        speech.supported ? soundTestButton(RABBIT_STORY, "welcome.story.play") : h("p", { class: "warn-line" }, t("about.voice.unsupported")),
         themePicker()),
       h("button", { class: "btn primary wide", type: "button", onclick: () => renderWelcome(2) },
         ...withIcon("arrow", t("welcome.sound.ok"))),
@@ -379,7 +400,7 @@ function inAppNotice() {
 
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
-fetch("i18n/ko.json?v=2026111206")
+fetch("i18n/ko.json?v=2026111207")
   .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then((text) => {
     state.text = text;

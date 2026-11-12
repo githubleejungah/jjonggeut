@@ -10,8 +10,8 @@
 
 | 단계 | 내용 | 상태 |
 |---|---|---|
-| 1 뼈대 | 학습 규칙·음성 엔진·화면 부품·점검 도구 | 진행 중 |
-| 2 콘텐츠 | 콘텐츠·문장·라이선스 데이터, VOA 대화 3편 | 예정 |
+| 1 뼈대 | 학습 규칙·음성 엔진·처음 시작 화면(토끼 이야기·관심사·색 테마)·점검 도구 | 완료 |
+| 2 콘텐츠 | 콘텐츠·문장·라이선스 데이터, VOA 3편(199문장, 시각·번역) | 완료 |
 | 3 루프 | 문장 플레이어, 자동 멈춤, 녹음 비교, 요지 적기 | 예정 |
 | 4 카드·복습 | 청크 카드, 확신도+채점, 새 카드 30% 섞기 | 예정 |
 | 5 진단·어휘 | 간이 수준 진단(CEFR), A1~B1 어휘 팩 | 예정 |
@@ -55,15 +55,25 @@ site/                 정적 웹앱 (이 폴더만 배포)
   css/style.css       디자인 규칙과 색
   i18n/ko.json        화면 문구
   img/rabbit.svg      토끼 시안
-tests/                node --test 로 돌리는 시험
+  data/contents.json  콘텐츠·문장·라이선스 (데이터 파일 하나 = 계약)
+  audio/              VOA 음성 (공공 저작물)
+tests/                시험 (node --test, python -m unittest)
 pipeline/check.py     종합 점검
-docs/                 결정 요약
+pipeline/validate.py  콘텐츠 검사: 라이선스 없거나 만료되면 게시 차단, 문장 시각
+pipeline/voa_text.py  VOA 페이지에서 본문만 뽑기
+pipeline/align.py     문장 시각 맞추기 (faster-whisper 단어 시각 → 원문 문장)
+pipeline/import_content.py  미리보기 → 승인 → 적용
+docs/                 결정 요약, 데이터 모양
 ```
 
 ## 기록과 개인정보
 
 - 기록은 사용자 기기의 브라우저에만 저장한다(서버 없음). 정보 화면에서 파일로 내보내고 가져올 수 있다.
 - 녹음은 기기 밖으로 보내지 않는다.
+
+## 콘텐츠 출처
+
+듣기 콘텐츠는 [VOA Learning English](https://learningenglish.voanews.com/p/6861.html)의 공공 저작물(음성과 글)이다. 원문 페이지의 통신사(AP·로이터·AFP) 사진은 쓰지 않는다. 한국어 번역은 Claude 초안을 사람이 승인했다.
 
 ## 다시 쓴 코드
 

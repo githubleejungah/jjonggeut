@@ -195,6 +195,18 @@ h3 { font-size: 1.05rem; margin: 0 0 8px; }
 .welcome { text-align: center; }
 .welcome .rabbit-big { display: block; margin: 0 auto 8px; }
 .btn.wide { width: 100%; margin-top: 10px; }
+
+/* 토끼 이야기 말풍선. 읽는 줄은 글자 밑 띠(형광펜 기본 모양)로 표시한다 */
+.story { text-align: left; margin: 10px 0 12px; display: grid; gap: 6px; }
+.story-line {
+  margin: 0; padding: 8px 12px; border-radius: 14px 14px 14px 4px;
+  background: var(--bg); border: 1px solid var(--border);
+}
+.story-line.en { font-weight: 600; border-radius: 14px 14px 4px 14px; background: var(--accent-soft); color: var(--accent-ink); border-color: transparent; }
+.story-line.reading {
+  background-image: linear-gradient(transparent 62%, color-mix(in srgb, var(--accent) 28%, transparent) 62%);
+  outline: 2px solid var(--accent);
+}
 .center { text-align: center; }
 .tips { margin: 12px 0 0; padding-left: 1.3em; }
 .tips li { margin-bottom: 4px; }
