@@ -53,7 +53,10 @@ def build(name: str, today: str) -> dict:
         "topics": meta["topics"], "license_id": meta["license_id"], "source_url": meta["source_url"],
         "audio": {"src": aligned["audio"], "duration_ms": aligned["duration_ms"]},
         "added_at": today, "reviewed": True, "sentences": sentences,
-        "scenes": split_scenes(sentences, meta["level"]),
+        # 사람이 정한 장면 경계가 있으면 그것을 쓴다 (2026-11-12). 시각을 다시 맞추면 쉼 길이가 바뀌어
+        # 자동 경계가 움직이는데, 장면 번호에 학습 기록이 묶여 있고 이야기 흐름은 사람이 더 잘 본다.
+        "scenes": [{"from": a, "to": b} for a, b in meta["scenes"]] if meta.get("scenes")
+                  else split_scenes(sentences, meta["level"]),
     }
 
 

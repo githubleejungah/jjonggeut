@@ -436,7 +436,7 @@ function inAppNotice() {
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
 const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url} ${r.status}`); return r.json(); });
-Promise.all([getJSON("i18n/ko.json?v=2026111212"), getJSON("data/contents.json?v=2026111212")])
+Promise.all([getJSON("i18n/ko.json?v=2026111212"), getJSON("data/contents.json?v=2026111216")])
   .then(([text, data]) => {
     state.text = text;
     state.contents = data.contents ?? [];

@@ -102,33 +102,51 @@ def norm(token: str) -> str:
     return re.sub(r"[^a-z0-9']", "", token.lower().replace("’", "'"))
 
 
+def tokens(text: str) -> list[str]:
+    """단어로 나눈다. 하이픈·대시에서도 나눈다 (2026-11-12).
+    받아쓰기는 "check-in"을 "check" + "-in."처럼 따로 내놓는데, 원문은 한 단어라
+    "checkin"과 "check"가 서로 맞지 않았다 → 문장 끝이 "with"에서 끊겼다."""
+    return [n for part in re.split(r"[\s\-‐‑‒–—]+", text) if (n := norm(part))]
+
+
 def match(words: list[dict], sentences: list[dict]) -> list[dict]:
-    asr = [norm(w["w"]) for w in words]
+    asr, asr_word = [], []          # 받아쓴 단어 조각, 그 조각이 나온 단어 번호
+    for wi, w in enumerate(words):
+        for n in tokens(w["w"]):
+            asr.append(n)
+            asr_word.append(wi)
     ref, owner = [], []
     for i, s in enumerate(sentences):
-        for tok in s["en"].split():
-            n = norm(tok)
-            if n:
-                ref.append(n)
-                owner.append(i)
-    hit = {}   # 원문 단어 번호 → 받아쓴 단어 번호
+        for n in tokens(s["en"]):
+            ref.append(n)
+            owner.append(i)
+    hit = {}   # 원문 조각 번호 → 받아쓴 조각 번호
     sm = difflib.SequenceMatcher(None, ref, asr, autojunk=False)
     for a, b, size in sm.get_matching_blocks():
         for k in range(size):
             hit[a + k] = b + k
-    totals = {}
+    spans = []   # 문장마다 (원문 조각 수, 맞은 받아쓴 조각들, 앞쪽 못 맞춘 수, 뒤쪽 못 맞춘 수)
     for i in range(len(sentences)):
         idx = [j for j, o in enumerate(owner) if o == i]
         got = [hit[j] for j in idx if j in hit]
-        totals[i] = (len(idx), got)
+        lead = next((n for n, j in enumerate(idx) if j in hit), len(idx))
+        tail = next((n for n, j in enumerate(reversed(idx)) if j in hit), len(idx))
+        spans.append((len(idx), got, lead, tail))
     out = []
     for i, s in enumerate(sentences):
-        n, got = totals[i]
+        n, got, lead, tail = spans[i]
         item = dict(s)
         item["match"] = round(len(got) / n, 2) if n else 0
         if got:
-            item["start_ms"] = words[min(got)]["s"]
-            item["end_ms"] = words[max(got)]["e"]
+            lo, hi = min(got), max(got)
+            # 문장 처음·끝 단어를 못 맞췄으면(받아쓰기가 다르게 적음), 이웃 문장에 속하지 않은
+            # 받아쓴 조각을 그 수만큼 끌어온다. 끝이 잘리지 않게 하려는 것.
+            prev_hi = max(spans[i - 1][1], default=-1) if i else -1
+            next_lo = min(spans[i + 1][1], default=len(asr)) if i + 1 < len(spans) else len(asr)
+            lo = max(lo - lead, prev_hi + 1, 0)
+            hi = min(hi + tail, next_lo - 1, len(asr) - 1)
+            item["start_ms"] = words[asr_word[lo]]["s"]
+            item["end_ms"] = words[asr_word[hi]]["e"]
         out.append(item)
     return out
 
@@ -208,8 +226,8 @@ def verify(mp3: Path, content_id: str) -> int:
     for i, s in enumerate(content["sentences"], 1):
         a, b = int(s["start_ms"] * 16), int(s["end_ms"] * 16)          # 16kHz → 밀리초당 16개
         segs, _ = model.transcribe(audio[a:b], language="en", vad_filter=False)
-        heard = [norm(w) for w in " ".join(x.text for x in segs).split() if norm(w)]
-        want = [norm(w) for w in s["en"].split() if norm(w)]
+        heard = tokens(" ".join(x.text for x in segs))
+        want = tokens(s["en"])
         sm = difflib.SequenceMatcher(None, want, heard, autojunk=False)
         rate = sum(m.size for m in sm.get_matching_blocks()) / max(len(want), 1)
         rates.append(rate)

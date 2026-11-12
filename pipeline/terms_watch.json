@@ -1,0 +1,34 @@
+{
+ "about": "쫑긋이 기대는 이용 조건 페이지. watch_terms.py가 읽는다. start~end 사이 글만 견준다(메뉴·날짜 같은 바뀌는 부분을 빼려고).",
+ "sources": [
+  {
+   "id": "voa-terms",
+   "name": "VOA Learning English 이용 조건 (Request Our Content)",
+   "url": "https://learningenglish.voanews.com/p/6861.html",
+   "start": "Requesting usage of VOA Learning English content",
+   "end": "Follow Us About Learning English",
+   "license_id": "voa-public-domain",
+   "affects": "듣기 콘텐츠 전부(site/data/contents.json, site/audio/). 출처 표기 문구, 통신사 자료 제외 규칙"
+  },
+  {
+   "id": "cefrj-readme",
+   "name": "CEFR-J 어휘 목록·Octanove C1/C2 저장소 안내 (라이선스 포함)",
+   "url": "https://raw.githubusercontent.com/openlanguageprofiles/olp-en-cefrj/master/README.md",
+   "affects": "어휘 등급(vocab/CEFR_어휘_목록_v2.csv), 대본 단어 뜻의 등급"
+  },
+  {
+   "id": "ngsl-home",
+   "name": "NGSL 프로젝트 첫 화면 (라이선스 문구)",
+   "url": "https://www.newgeneralservicelist.com/",
+   "start": "Open since 2013",
+   "end": "The Word Lists",
+   "affects": "어휘 빈도 순위·학술/비즈니스/토익 팩(vocab/), 목록 공개 라이선스(CC BY-SA 4.0)"
+  },
+  {
+   "id": "faster-whisper-license",
+   "name": "faster-whisper 라이선스 (문장 시각 맞추기 도구)",
+   "url": "https://raw.githubusercontent.com/SYSTRAN/faster-whisper/master/LICENSE",
+   "affects": "콘텐츠 넣기 도구(pipeline/align.py). 앱에는 들어가지 않는다"
+  }
+ ]
+}
