@@ -321,9 +321,7 @@ function renderHome() {
       cur
         ? h("a", { class: "btn primary", href: `#/loop/${cur.c.id}/${firstOpenScene(cur.c) + 1}` }, ...withIcon("arrow", t("home.continue")))
         : h("a", { class: "btn primary", href: "#/library" }, ...withIcon("arrow", t("home.start")))),
-    h("section", { class: "rabbit-card" },
-      h("img", { src: "img/rabbit.svg", alt: "", class: "rabbit-big" }),
-      h("p", {}, t("home.rabbit"))),
+    rabbitCard(),
     h("nav", { class: "link-list" },
       linkRow("#/library", "book", t("home.library"), t("home.library.desc", { n: state.contents.length })),
       linkRow("#/progress", "chart", t("home.progress"), t("home.progress.desc"))),
@@ -332,7 +330,51 @@ function renderHome() {
   );
 }
 
-/* ---------- 화면 2: 내 기록 (6단계에서 채운다) ---------- */
+// 오늘의 계절·기념일 (꾸미기를 끈 사람은 null). 날짜는 앱의 하루 경계(새벽 4시)를 따른다
+function todayOccasion() {
+  return Review.getSettings().seasonal === false ? null : Rabbit.occasion(Review.today());
+}
+const rabbitState = () => ({ ...Rabbit.START, ...(Review.getSettings().rabbit ?? {}) });
+
+// 홈의 토끼 카드: 지금 살찐 정도 + 오늘의 차림. 공휴일이면 그날의 영어 한 줄을 들려준다
+function rabbitCard() {
+  const occ = todayOccasion();
+  const art = Rabbit.el({ chub: rabbitState().chub, wear: occ?.wear, label: t("rabbit.alt") }, "rabbit-art");
+  return h("section", { class: "rabbit-card" },
+    art,
+    h("div", { class: "rabbit-text" },
+      occ?.holiday
+        ? [h("p", { class: "small" }, h("b", {}, t("occ.today", { name: t(`occ.${occ.id}.name`) }))),
+           h("p", { class: "occ-en", lang: "en" }, t(`occ.${occ.id}.en`)),
+           h("p", { class: "muted small" }, t(`occ.${occ.id}.ko`)),
+           soundTestButton([{ key: `occ.${occ.id}.en`, lang: "en-US" }, { key: `occ.${occ.id}.ko`, lang: "ko-KR" }], "occ.listen")]
+        : h("p", {}, t("home.rabbit"))));
+}
+
+// 토끼 모음 (2026-11-12): 계절·기념일 차림과 살찐 단계를 한눈에. 정보 화면에서 들어간다
+function renderRabbits() {
+  renderTopbar(false);
+  const tile = (opts, label) => h("figure", { class: "rabbit-tile" },
+    Rabbit.el({ ...opts, label }, "rabbit-art"), h("figcaption", {}, label));
+  app.replaceChildren(
+    h("h2", {}, t("rabbits.title")),
+    h("p", { class: "muted small" }, t("rabbits.desc")),
+    h("h3", {}, t("rabbits.chub")),
+    h("div", { class: "rabbit-grid" },
+      tile({ chub: 0 }, t("rabbits.chub.0")), tile({ chub: 0, snack: 0 }, t("rabbits.snack")),
+      tile({ chub: 1, snack: 1 }, t("rabbits.chub.1")), tile({ chub: 2 }, t("rabbits.chub.2")),
+      tile({ chub: 3 }, t("rabbits.chub.3")), tile({ chub: 2, workout: true }, t("rabbits.workout"))),
+    h("h3", {}, t("rabbits.seasons")),
+    h("div", { class: "rabbit-grid" }, ["spring", "summer", "autumn", "winter"].map((id) =>
+      tile({ wear: id }, t(`occ.${id}.name`)))),
+    h("h3", {}, t("rabbits.holidays")),
+    h("div", { class: "rabbit-grid" }, Rabbit.ALL_OCCASIONS.slice(4).map((id) =>
+      tile({ wear: Rabbit.wearOf(id) }, t(`occ.${id}.name`)))),
+    h("p", { class: "muted small" }, t("rabbits.dates", { from: Rabbit.lunarYears()[0], to: Rabbit.lunarYears().at(-1) })),
+    h("a", { class: "btn wide", href: "#/about" }, t("back")));
+}
+
+/* ---------- 화면 2: 내 기록 ---------- */
 // 내 기록 (2026-11-12): 저장된 기록으로만 그린다 (화면 값이 아니라 저장소가 기준)
 let progressMonth = null;   // 달력에 보이는 달 "YYYY-MM"
 function renderProgress() {
@@ -431,6 +473,13 @@ function renderAbout() {
       h("h3", {}, t("about.voice")),
       speech.supported ? [info, soundTestButton(), soundTips()] : h("p", {}, t("about.voice.unsupported"))),
     h("section", { class: "card" }, themePicker()),
+    h("section", { class: "card" },
+      h("h3", {}, t("about.seasonal")),
+      h("label", { class: "check-line" },
+        h("input", { type: "checkbox", checked: Review.getSettings().seasonal !== false ? "checked" : null,
+          onchange: (ev) => Review.setSettings({ seasonal: ev.currentTarget.checked }) }),
+        " ", t("about.seasonal.desc")),
+      h("a", { href: "#/rabbits" }, t("rabbits.title"))),
     h("nav", { class: "link-list" },
       linkRow("#/interests", "plus", t("interest.title"),
         interests.length ? interestNames(interests) : t("interest.none"))),
@@ -481,6 +530,7 @@ function route() {
   if (!Review.getSettings().onboarded && hash !== "#/about") renderWelcome(1);
   else if (hash === "#/about") renderAbout();
   else if (hash === "#/progress") renderProgress();
+  else if (hash === "#/rabbits") renderRabbits();
   else if (hash === "#/interests") renderInterests();
   else if (page === "library") renderLibrary();
   else if (page === "loop") renderLoop(decodeURIComponent(id ?? ""), scene, step);
@@ -506,7 +556,7 @@ function inAppNotice() {
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
 const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url} ${r.status}`); return r.json(); });
-Promise.all([getJSON("i18n/ko.json?v=2026111219"), getJSON("data/contents.json?v=2026111219")])
+Promise.all([getJSON("i18n/ko.json?v=2026111220"), getJSON("data/contents.json?v=2026111219")])
   .then(([text, data]) => {
     state.text = text;
     state.contents = data.contents ?? [];

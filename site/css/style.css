@@ -443,3 +443,27 @@ details.series > summary:focus-visible { outline: 2px solid var(--accent); outli
 .series-plain { margin: 16px 0 6px; }
 .series-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin: 0 0 6px; font-size: 1rem; }
 .series-plain .content-list { margin-top: 4px; }
+
+/* 토끼 그림 (2026-11-12): 높이를 정하면 살찐 만큼 가로가 넓어진다 */
+.rabbit-art { display: inline-block; height: 92px; line-height: 0; flex: none; }
+.rabbit-art svg { height: 100%; width: auto; overflow: visible; }
+.rabbit-card .rabbit-text { min-width: 0; }
+.rabbit-card .rabbit-text p { margin: 0 0 4px; }
+.occ-en { font-weight: 700; }
+.rabbit-stage { display: inline-block; }
+.welcome .rabbit-stage { display: block; width: fit-content; margin: 0 auto 4px; }
+.welcome .rabbit-stage .rabbit-art { height: 110px; }
+.rabbit-note { min-height: 1.5em; }
+.rabbit-note .btn-row.center { justify-content: center; }
+.rabbit-stage.puff { animation: puff 0.5s ease; }
+.rabbit-stage.slim { animation: slim 0.5s ease; }
+@keyframes puff { 0% { transform: scale(0.94, 1); } 60% { transform: scale(1.06, 0.98); } 100% { transform: none; } }
+@keyframes slim { 0% { transform: scale(1.06, 1); } 60% { transform: scale(0.96, 1.02); } 100% { transform: none; } }
+.check-line { display: flex; gap: 8px; align-items: flex-start; margin: 6px 0 10px; }
+.check-line input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--accent); }
+.rabbit-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 10px; margin: 8px 0 16px; }
+.rabbit-tile { margin: 0; padding: 10px 4px 8px; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); text-align: center; }
+.rabbit-tile .rabbit-art { height: 72px; }
+.rabbit-tile figcaption { font-size: 0.82rem; margin-top: 4px; }
+.cf.leaf { width: 10px; height: 7px; border-radius: 0 90% 0 90%; }
+.cf.star { width: 10px; height: 10px; clip-path: polygon(50% 0, 61% 38%, 100% 38%, 68% 61%, 79% 100%, 50% 76%, 21% 100%, 32% 61%, 0 38%, 39% 38%); }

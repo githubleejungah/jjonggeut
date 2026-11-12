@@ -216,6 +216,7 @@ function finishStep(c, sc, step) {
   const firstGoal = Review.goalMet(Review.getCards()) && Review.getSettings().celebrated_on !== Review.today();
   if (firstGoal) Review.setSettings({ celebrated_on: Review.today() });
   celebrateNext = firstGoal;
+  rabbitNext = true;          // 마침 화면에 들어갈 때만 토끼 간식 흐름이 한 칸 나아간다 (새로고침으로는 안 나아감)
   if (firstGoal || !next) location.hash = `#/done/${c.id}/${sc.k + 1}`;    // 하루 한 번 축하 (F-22)
   else location.hash = `#/loop/${c.id}/${sc.k + 1}/${next}`;
 }
@@ -590,17 +591,18 @@ function retellPanel(c, sc) {
 /* ---------- 마침·축하 ---------- */
 // 하루 목표를 처음 이룬 순간에만 꽃가루가 터진다 (2026-11-12 사용자 제안). 새로고침하면 다시 나오지 않는다
 let celebrateNext = false;
+let rabbitNext = false;
 
 // 꽃가루: 토끼 뒤에서 두 번 '펑' 터져 천천히 떨어진다(약 2.5초). 그림 파일 없이 작은 도형만 쓴다.
 // 색은 테마 장미색 + 차분한 파스텔(노랑·세이지·하늘·살구), 모양은 동그라미·꽃잎·리본.
 // 움직임 줄이기 설정이면 띄우지 않는다. 화면 읽기 프로그램은 무시한다(aria-hidden).
-function confetti(anchor) {
+function confetti(anchor, theme = null) {
   if (!anchor || matchMedia("(prefers-reduced-motion: reduce)").matches || !Element.prototype.animate) return;
   const r = anchor.getBoundingClientRect();
   const x0 = r.left + r.width / 2, y0 = r.top + r.height * 0.45;
   const layer = h("div", { class: "confetti", "aria-hidden": "true" });
-  const colors = ["var(--accent)", "var(--pen)", "#9cc3ae", "#9cc0e6", "#f2c4a4"];
-  const shapes = ["dot", "petal", "ribbon"];
+  const colors = theme?.colors ?? ["var(--accent)", "var(--pen)", "#9cc3ae", "#9cc0e6", "#f2c4a4"];
+  const shapes = theme?.shapes ?? ["dot", "petal", "ribbon"];
   const burst = (n, delay, power) => {
     for (let i = 0; i < n; i++) {
       const piece = h("i", { class: `cf ${shapes[i % shapes.length]}`,
@@ -624,6 +626,54 @@ function confetti(anchor) {
   setTimeout(() => layer.remove(), 3800);
 }
 
+// 마침 화면의 토끼: 간식 → 통통 → 고르기 → 운동(원래 몸) 또는 간식 더(더 통통). 규칙은 rabbit.js의 Rabbit.step
+function rabbitMoment(occ) {
+  let st = rabbitState();
+  let ev = null;
+  if (rabbitNext) {
+    const r = Rabbit.step(st);
+    st = r.state;
+    ev = r;
+    Review.setSettings({ rabbit: st });
+  }
+  rabbitNext = false;
+  const wear = occ?.wear;
+  const calm = occ?.solemn;
+  const art = h("span", { class: `rabbit-stage${calm ? "" : " bounce"}` });
+  const draw = (opts) => art.replaceChildren(Rabbit.el({ wear, label: t("rabbit.alt"), ...opts }, "rabbit-art"));
+  const note = h("div", { class: "rabbit-note", "aria-live": "polite" });
+  const say = (key) => note.replaceChildren(h("p", { class: "small" }, t(key)));
+  const chooser = () => {
+    const pick = (p) => () => {
+      Review.setSettings({ rabbit: Rabbit.choose(rabbitState(), p) });
+      say(p === "food" ? "rabbit.chose.food" : "rabbit.chose.exercise");
+    };
+    note.replaceChildren(
+      h("p", { class: "small" }, h("b", {}, t("rabbit.choose"))),
+      h("div", { class: "btn-row center" },
+        h("button", { class: "chip", type: "button", onclick: pick("exercise") }, t("rabbit.exercise")),
+        h("button", { class: "chip", type: "button", onclick: pick("food") }, t("rabbit.food"))));
+  };
+  const event = ev?.event;
+  if (event === "snack") { draw({ chub: st.chub, snack: st.snacks }); say("rabbit.ate"); }
+  else if (event === "grow" || event === "feast") {
+    draw({ chub: ev.from, snack: st.snacks });             // 먹는 모습 → 잠시 뒤 옆으로 통통
+    setTimeout(() => { draw({ chub: st.chub }); art.classList.add("puff"); }, 900);
+    say(event === "grow" ? "rabbit.grew" : "rabbit.feast");
+    if (event === "feast") setTimeout(chooser, 1600);
+  } else if (event === "full") { draw({ chub: st.chub, snack: st.snacks }); say("rabbit.full"); setTimeout(chooser, 1600); }
+  else if (event === "exercise") {
+    draw({ chub: ev.from, workout: true });                 // 운동하는 모습 → 원래 몸으로
+    setTimeout(() => { draw({ chub: 0, workout: true }); art.classList.add("slim"); }, 1000);
+    say("rabbit.exercised");
+  } else {
+    draw({ chub: st.chub });
+    if (st.stage === "choose" && !st.pending) chooser();   // 고르기 차례 (새로고침해도 고를 수 있게)
+    else if (st.pending) say(st.pending === "food" ? "rabbit.chose.food" : "rabbit.chose.exercise");
+  }
+  return { art, note };
+}
+
 function renderDone(id, sceneNo) {
   renderTopbar(false);
   const c = contentById(id);
@@ -631,14 +681,16 @@ function renderDone(id, sceneNo) {
   const todayScenes = Object.keys(Review.loopToday()).length;
   const k = (Number(sceneNo) || 1) - 1;
   const nextScene = c && k + 1 < c.scenes.length ? k + 2 : null;
-  const rabbit = h("img", { src: "img/rabbit.svg", alt: "", class: "rabbit-big bounce" });
-  const party = celebrateNext && met;
+  const occ = todayOccasion();
+  const party = celebrateNext && met && !occ?.solemn;     // 현충일에는 꽃가루를 띄우지 않는다
   celebrateNext = false;
-  if (party) requestAnimationFrame(() => confetti(rabbit));
+  const { art: rabbit, note } = rabbitMoment(occ);
+  if (party) requestAnimationFrame(() => confetti(rabbit, occ?.confetti));
   app.replaceChildren(
     h("section", { class: "card welcome" },
       rabbit,
       h("h2", {}, t(met ? "done.goal" : "done.step")),
+      note,
       h("p", {}, t(met ? "done.goal.desc" : "done.step.desc")),
       h("p", { class: "muted small" }, t("done.today", { n: todayScenes }))),
     c && h("a", { class: "btn primary wide", href: `#/loop/${c.id}/${k + 1}` }, ...withIcon("arrow", t("done.continue"))),
