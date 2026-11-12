@@ -23,6 +23,7 @@ LEVELS = {"A1", "A2", "B1", "B2", "C1", "C2"}
 TOPICS = {"work", "travel", "daily", "food", "health", "science", "culture", "sports", "news"}
 LICENSE_KINDS = {"public_domain", "cc_by", "cc_by_sa", "contract", "own"}
 OVERLAP_MS = 150   # 문장 경계 허용 오차 (비기능 요구사항)
+SCENE_MAX_MS = {"A1": 30000, "A2": 30000, "B1": 60000, "B2": 120000, "C1": 120000, "C2": 120000}  # scenes.py와 같게
 
 
 def validate(data: dict, site_dir: Path = SITE, today: str | None = None) -> list[str]:
@@ -109,6 +110,28 @@ def validate(data: dict, site_dir: Path = SITE, today: str | None = None) -> lis
             if duration is not None and end > duration + OVERLAP_MS:
                 err(f"{sw}: 음성 길이({duration}ms)를 넘습니다")
             prev_end = end
+
+        # 장면: 빈틈없이 문장 전체를 순서대로 덮어야 한다. 한 장면은 수준별 최대 길이 이하
+        # (한 문장이 최대보다 긴 경우만 예외). 규칙은 pipeline/scenes.py
+        scenes = c.get("scenes")
+        sents = c.get("sentences") or []
+        if not scenes:
+            err(f"{where}: 'scenes' 칸이 비어 있습니다")
+        else:
+            expect = 0
+            max_ms = SCENE_MAX_MS.get(c.get("level"), 60000)
+            for k, sc in enumerate(scenes):
+                a, b = sc.get("from"), sc.get("to")
+                if a != expect or not isinstance(b, int) or b < a or b >= len(sents):
+                    err(f"{where} 장면 {k + 1}: 문장 {expect + 1}번부터 이어져야 합니다")
+                    break
+                length = sents[b]["end_ms"] - sents[a]["start_ms"]
+                if length > max_ms and a != b:
+                    err(f"{where} 장면 {k + 1}: {length / 1000:.0f}초로 {c.get('level')} 최대 {max_ms // 1000}초를 넘습니다")
+                expect = b + 1
+            else:
+                if expect != len(sents):
+                    err(f"{where}: 장면이 마지막 문장까지 덮지 않습니다")
     return errors
 
 

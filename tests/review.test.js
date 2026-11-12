@@ -243,3 +243,31 @@ test("복습이 목표의 2배 넘게 밀리면 새 카드는 1장만", () => {
   assert.equal(p.newCount, 1);
   assert.equal(p.reviewCount, 9);
 });
+
+// ----- 오늘의 루프 기록과 하루 목표 달성 (2026-11-12 추가) -----
+test("루프 단계 기록: 콘텐츠 기록과 날짜별 기록에 함께 남는다", () => {
+  fresh("2026-11-12");
+  Review.markLoopStep("voa-a", "listen");
+  Review.markLoopStep("voa-a", "listen");                  // 같은 단계는 한 번만
+  Review.markLoopStep("voa-a", "gist");
+  assert.deepEqual(Review.getLoop("voa-a").done, ["listen", "gist"]);
+  assert.deepEqual(Review.loopToday(), { "voa-a": ["listen", "gist"] });
+  setDate("2026-11-13");
+  assert.deepEqual(Review.loopToday(), {});                 // 다음 날은 새로
+  assert.deepEqual(Review.getLoop("voa-a").done, ["listen", "gist"]);   // 콘텐츠 진행은 남는다
+  assert.throws(() => Review.markLoopStep("voa-a", "dance"));
+});
+
+test("하루 목표: 루프 한 단계 이상 + 오늘 차례 복습을 끝내야 달성", () => {
+  fresh("2026-11-12");
+  const terms = [{ id: "c1" }];
+  assert.equal(Review.goalMet(terms), false);               // 아무것도 안 함
+  Review.markLoopStep("voa-a", "listen");
+  assert.equal(Review.goalMet(terms), true);                // 차례인 복습이 없으면 루프 한 단계로 달성
+  Review.record("c1", { confidence: "sure", correct: true });   // 내일 복습 예정
+  setDate("2026-11-13");
+  Review.markLoopStep("voa-a", "read");
+  assert.equal(Review.goalMet(terms), false);               // 오늘 차례 복습 c1이 남음
+  Review.record("c1", { confidence: "sure", correct: true });
+  assert.equal(Review.goalMet(terms), true);
+});

@@ -133,6 +133,33 @@ def match(words: list[dict], sentences: list[dict]) -> list[dict]:
     return out
 
 
+PAD_BEFORE_MS = 120
+PAD_AFTER_MS = 300
+SHORT_MS = 300
+
+
+def pad(sents: list[dict], duration_ms: int) -> None:
+    """문장 앞뒤에 여유를 준다 (2026-11-12, 구간을 다시 받아써 보니 끝이 잘린 문장이 있었다).
+    받아쓰기 모델은 단어 끝을 실제보다 조금 일찍 잡는다. 그래서
+      시작은 0.12초 앞당기고(앞 문장 끝보다 앞으로는 가지 않음),
+      끝은 0.3초 늦춘다(다음 문장 시작을 넘지 않음).
+    0.3초보다 짧게 잡힌 문장("Congratulations!"가 길이 0으로 잡힘)은 앞뒤 빈틈 전체를 쓴다."""
+    orig = [(s["start_ms"], s["end_ms"]) for s in sents]
+    for k, s in enumerate(sents):
+        prev_end = orig[k - 1][1] if k else 0
+        next_start = orig[k + 1][0] if k + 1 < len(sents) else duration_ms
+        start, end = orig[k]
+        if end - start < SHORT_MS:
+            s["start_ms"], s["end_ms"] = max(prev_end, start - 600), next_start
+        else:
+            s["start_ms"] = max(prev_end, start - PAD_BEFORE_MS)
+            s["end_ms"] = min(next_start, end + PAD_AFTER_MS)
+    # 여유끼리 겹치면 앞 문장의 늘린 끝을 줄인다 (원래 구간은 건드리지 않는다)
+    for k in range(1, len(sents)):
+        if sents[k]["start_ms"] < sents[k - 1]["end_ms"]:
+            sents[k - 1]["end_ms"] = max(sents[k]["start_ms"], orig[k - 1][1])
+
+
 def main(argv: list[str]) -> int:
     sys.stdout.reconfigure(encoding="utf-8")
     cmd, mp3 = argv[0], Path(argv[1])
@@ -149,12 +176,7 @@ def main(argv: list[str]) -> int:
         # 음성에 없는 문장(소제목, 영상에만 있는 말 등)은 뺀다. 무엇을 뺐는지는 화면에 남긴다.
         dropped = [s for s in sents if s["match"] < 0.3 or "start_ms" not in s]
         sents = [s for s in sents if s not in dropped]
-        # 한 단어 문장은 받아쓰기가 길이 0으로 잡을 때가 있다("Congratulations!").
-        # 끝 시각을 다음 문장 시작 전까지, 최대 0.4초 늘린다.
-        for k, s in enumerate(sents):
-            if s["end_ms"] <= s["start_ms"]:
-                limit = sents[k + 1]["start_ms"] if k + 1 < len(sents) else data["duration_ms"]
-                s["end_ms"] = min(s["start_ms"] + 400, max(limit, s["start_ms"] + 1))
+        pad(sents, data["duration_ms"])
         for s in dropped:
             print(f"  음성에 없어 뺌: {s['en'][:70]}")
         OUT.mkdir(parents=True, exist_ok=True)
@@ -166,8 +188,37 @@ def main(argv: list[str]) -> int:
         for s in low:
             print(f"  확인 필요 ({s['match']}): {s['en'][:70]}")
         return 0
-    print("사용법: align.py words|match ...")
+    if cmd == "verify":
+        return verify(mp3, argv[2])
+    print("사용법: align.py words|match|verify ...")
     return 2
+
+
+def verify(mp3: Path, content_id: str) -> int:
+    """'귀로 확인'을 대신하는 검사: 문장 구간만 잘라 다시 받아쓰고 원문과 견준다.
+    구간이 어긋나면 앞뒤 문장이 섞이거나 말이 잘려 일치율이 떨어진다.
+      .venv/Scripts/python.exe pipeline/align.py verify site/audio/파일.mp3 <콘텐츠 id>
+    """
+    from faster_whisper import WhisperModel
+    data = json.loads((ROOT / "site" / "data" / "contents.json").read_text(encoding="utf-8"))
+    content = next(c for c in data["contents"] if c["id"] == content_id)
+    audio = decode(mp3)
+    model = WhisperModel(MODEL, device="cpu", compute_type="int8")
+    rates, low = [], []
+    for i, s in enumerate(content["sentences"], 1):
+        a, b = int(s["start_ms"] * 16), int(s["end_ms"] * 16)          # 16kHz → 밀리초당 16개
+        segs, _ = model.transcribe(audio[a:b], language="en", vad_filter=False)
+        heard = [norm(w) for w in " ".join(x.text for x in segs).split() if norm(w)]
+        want = [norm(w) for w in s["en"].split() if norm(w)]
+        sm = difflib.SequenceMatcher(None, want, heard, autojunk=False)
+        rate = sum(m.size for m in sm.get_matching_blocks()) / max(len(want), 1)
+        rates.append(rate)
+        if rate < 0.7:
+            low.append((i, round(rate, 2), s["en"], " ".join(heard)))
+    print(f"{content_id}: 문장 {len(rates)}개, 평균 일치 {sum(rates) / len(rates):.0%}, 70% 미만 {len(low)}개")
+    for i, r, want, heard in low:
+        print(f"  {i}번 ({r}) 원문: {want[:60]} | 들린 말: {heard[:60]}")
+    return 0
 
 
 if __name__ == "__main__":

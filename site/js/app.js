@@ -4,16 +4,21 @@
    필드워드(field-words) app.js의 작은 도구(t, h, icon, progressRing, inAppNotice, route)를 가져왔다.
 
    화면
-     #/          홈: 오늘의 루프 (루프 화면은 3단계)
-     #/progress  내 기록 (6단계)
-     #/about     정보 · 소리 확인 · 기록 백업
+     #/                   홈: 오늘의 루프 (이어 하기 / 콘텐츠 고르기)
+     #/library            콘텐츠 고르기 (loop.js)
+     #/loop/<id>/<단계>   오늘의 루프 6단계 (loop.js)
+     #/done/<id>          마침·축하 (loop.js)
+     #/progress           내 기록 (6단계)
+     #/about              정보 · 소리 확인 · 기록 백업
    ========================================================= */
 
-const APP_VERSION = "0.0.1";
+const APP_VERSION = "0.0.3";
 const { speech } = Speech;
 
 const state = {
   text: {},           // 화면 문구 (i18n/ko.json)
+  contents: [],       // 콘텐츠 (data/contents.json)
+  licenses: [],       // 라이선스 (출처 표기)
 };
 
 const app = document.getElementById("app");
@@ -57,6 +62,13 @@ const ICONS = {
   back: "M15 6l-6 6 6 6",
   check: "M5 12.5l4.5 4.5L19 7.5",
   plus: "M12 5v14 M5 12h14",
+  play: "M8 5v14l11-7z",
+  pause: "M8 5v14 M16 5v14",
+  mic: "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z M5 11a7 7 0 0 0 14 0 M12 18v3",
+  user: "M12 4a4 4 0 1 0 0 8a4 4 0 1 0 0-8z M4 21c0-4 3.6-7 8-7s8 3 8 7",
+  both: "M9 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z M15 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z",
+  speed: "M4 17a8 8 0 1 1 16 0 M12 17l4.5-5 M12 9v1.5",
+  book: "M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z M12 6v13.5",
 };
 function icon(name) {
   const ns = "http://www.w3.org/2000/svg";
@@ -277,10 +289,22 @@ function renderInterests() {
 }
 
 /* ---------- 화면 1: 홈 ---------- */
+// 이어 할 콘텐츠: 가장 최근에 손댄 장면이 있고, 아직 다 마치지 않은 것 (장면 계산은 loop.js)
+function currentContent() {
+  return state.contents
+    .map((c) => ({ c, last: lastTouched(c) }))
+    .filter(({ c, last }) => last && scenesDone(c) < c.scenes.length)
+    .sort((a, b) => b.last.rec.updated_at.localeCompare(a.last.rec.updated_at))[0] ?? null;
+}
+
 function renderHome() {
   renderTopbar(true);
-  const p = Review.plan([]);   // 2단계에서 콘텐츠·카드가 생기면 실제 카드 목록을 넘긴다
   const interests = Review.getSettings().interests;
+  const cur = currentContent();
+  // 진행 링: 이어 할 콘텐츠의 마친 장면 수 / 전체 장면 수
+  const total = cur ? cur.c.scenes.length : 1;
+  const doneSteps = cur ? scenesDone(cur.c) : 0;
+  const met = Review.goalMet();
   app.replaceChildren(
     h("p", { class: "tagline" }, t("app.tagline")),
     interests.length > 0 && h("p", { class: "interest-line" },
@@ -288,16 +312,19 @@ function renderHome() {
       h("a", { href: "#/interests" }, t("home.interests.change"))),
     h("section", { class: "start-panel" },
       h("div", { class: "start-row" },
-        progressRing(p.done, p.goal, 104, true),
+        progressRing(doneSteps, total, 104, true),
         h("div", { class: "start-text" },
           h("h2", {}, t("home.today")),
-          h("p", { class: "info-line" }, t("home.goal", { done: p.done, goal: p.goal })))),
-      h("button", { class: "btn primary", disabled: true }, ...withIcon("arrow", t("home.start"))),
-      h("p", { class: "muted small" }, t("home.soon"))),
+          h("p", { class: "info-line" }, cur ? t("home.scene", { title: cur.c.title_ko, k: firstOpenScene(cur.c) + 1, n: cur.c.scenes.length }) : t("home.none")),
+          met && h("p", { class: "goal-line" }, icon("check"), t("home.goal.met")))),
+      cur
+        ? h("a", { class: "btn primary", href: `#/loop/${cur.c.id}/${firstOpenScene(cur.c) + 1}` }, ...withIcon("arrow", t("home.continue")))
+        : h("a", { class: "btn primary", href: "#/library" }, ...withIcon("arrow", t("home.start")))),
     h("section", { class: "rabbit-card" },
       h("img", { src: "img/rabbit.svg", alt: "", class: "rabbit-big" }),
       h("p", {}, t("home.rabbit"))),
     h("nav", { class: "link-list" },
+      linkRow("#/library", "book", t("home.library"), t("home.library.desc", { n: state.contents.length })),
       linkRow("#/progress", "chart", t("home.progress"), t("home.progress.desc"))),
     // 정보 화면은 필요한 사람만 찾아 들어가도록 맨 아래 작은 링크로 둔다
     h("p", { class: "footer" }, h("a", { href: "#/about" }, t("home.about"))),
@@ -375,11 +402,18 @@ function route() {
   speech.listeners.clear();
   speech.onSentence = null;
   const hash = location.hash || "#/";
+  const [, page, id, scene, step] = hash.split("/");
+  // 루프 화면 안에서 단계만 바꿀 때는 원음 플레이어를 그대로 둔다 (같은 파일을 다시 받지 않게)
+  if (!(page === "loop" && id === loopView.contentId)) cleanupLoop();
+  else loopView.player?.stop();
   // 처음 시작 화면을 마치지 않았으면 먼저 그것부터 (정보 화면은 언제든 볼 수 있게 예외)
   if (!Review.getSettings().onboarded && hash !== "#/about") renderWelcome(1);
   else if (hash === "#/about") renderAbout();
   else if (hash === "#/progress") renderProgress();
   else if (hash === "#/interests") renderInterests();
+  else if (page === "library") renderLibrary();
+  else if (page === "loop") renderLoop(decodeURIComponent(id ?? ""), scene, step);
+  else if (page === "done") renderDone(decodeURIComponent(id ?? ""), scene);
   else renderHome();
   window.scrollTo(0, 0);
 }
@@ -400,10 +434,12 @@ function inAppNotice() {
 
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
-fetch("i18n/ko.json?v=2026111207")
-  .then((r) => { if (!r.ok) throw new Error(r.status); return r.json(); })
-  .then((text) => {
+const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url} ${r.status}`); return r.json(); });
+Promise.all([getJSON("i18n/ko.json?v=2026111211"), getJSON("data/contents.json?v=2026111211")])
+  .then(([text, data]) => {
     state.text = text;
+    state.contents = data.contents ?? [];
+    state.licenses = data.licenses ?? [];
     inAppNotice();
     window.addEventListener("hashchange", route);
     route();

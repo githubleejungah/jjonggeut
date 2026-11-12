@@ -20,6 +20,7 @@ CONTENT = {
         {"start_ms": 0, "end_ms": 3000, "en": "Hello.", "ko": "안녕하세요."},
         {"start_ms": 3100, "end_ms": 6000, "en": "Where is gate 5?", "ko": "5번 탑승구가 어디예요?"},
     ],
+    "scenes": [{"from": 0, "to": 1}],
 }
 
 
@@ -78,3 +79,32 @@ class ValidateTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ScenesTest(unittest.TestCase):
+    """장면 나누기 규칙 (pipeline/scenes.py)"""
+
+    def setUp(self):
+        sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "pipeline"))
+        from scenes import split_scenes
+        self.split = split_scenes
+        # 4초짜리 문장 20개, 문장 사이 0.5초. 10번째 뒤만 2초 쉼(장면이 바뀌는 곳)
+        self.s, t = [], 0
+        for i in range(20):
+            self.s.append({"start_ms": t, "end_ms": t + 4000, "speaker": "A"})
+            t += 4000 + (2000 if i == 9 else 500)
+
+    def test_scenes_cover_all_in_order(self):
+        sc = self.split(self.s, "A2")
+        self.assertEqual(sc[0]["from"], 0)
+        self.assertEqual(sc[-1]["to"], 19)
+        for a, b in zip(sc, sc[1:]):
+            self.assertEqual(b["from"], a["to"] + 1)
+
+    def test_a2_scene_is_at_most_30_seconds(self):
+        for sc in self.split(self.s, "A2"):
+            self.assertLessEqual(self.s[sc["to"]]["end_ms"] - self.s[sc["from"]]["start_ms"], 30000)
+
+    def test_cut_at_longest_pause(self):
+        # B1(최대 60초)이면 2초 쉼이 있는 10번째 문장 뒤에서 자른다
+        self.assertEqual(self.split(self.s, "B1")[0]["to"], 9)

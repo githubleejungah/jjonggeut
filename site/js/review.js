@@ -284,6 +284,49 @@ const Review = (() => {
   function getSettings() { return { ...DEFAULT_SETTINGS, ...read("settings", {}) }; }
   function setSettings(patch) { write("settings", { ...getSettings(), ...patch }); }
 
+  // ----- 오늘의 루프 기록 (F-06) -----
+  // 루프 단계: 대본 없이 듣기 → 요지 적기 → 대본 보며 듣기 → 청크 뽑기 → 섀도잉 → 다시 말하기
+  // jg:v1:loop:<콘텐츠 id> = { done: [단계], gist: "요지", gist_score: "yes|part|no", updated_at }
+  // jg:v1:looplog = { "2026-11-12": { "<콘텐츠 id>": [단계] } }  ← 날짜별, 지우지 않는다
+  const LOOP_STEPS = ["listen", "gist", "read", "chunk", "shadow", "retell"];
+
+  function getLoop(id) { return { done: [], gist: "", gist_score: null, ...read(`loop:${id}`, {}) }; }
+
+  function saveLoop(id, patch) {
+    const rec = { ...getLoop(id), ...patch, updated_at: today() };
+    write(`loop:${id}`, rec);
+    return rec;
+  }
+
+  // 한 단계를 마쳤다. 콘텐츠 기록과 날짜별 기록에 함께 남긴다 (저장된 기록으로 계산: 필드워드 교훈 12)
+  function markLoopStep(id, step) {
+    if (!LOOP_STEPS.includes(step)) throw new Error(`모르는 루프 단계: ${step}`);
+    const rec = getLoop(id);
+    if (!rec.done.includes(step)) rec.done.push(step);
+    saveLoop(id, { done: rec.done });
+    const log = read("looplog", {});
+    const day = (log[today()] ??= {});
+    const steps = (day[id] ??= []);
+    if (!steps.includes(step)) steps.push(step);
+    write("looplog", log);
+    return rec;
+  }
+
+  function loopToday() { return read("looplog", {})[today()] ?? {}; }
+
+  // 하루 목표 달성 (2026-11-11 결정): 오늘 차례인 복습을 끝내고 루프를 한 단계 이상 했다
+  // terms: 복습 카드 목록 (4단계 전에는 빈 목록)
+  function goalMet(terms = []) {
+    const now = today();
+    const t = getToday();
+    const reviewsLeft = terms.some((term) => {
+      const rec = get(term.id);
+      return rec && rec.next_review_at <= now && !t.seen.includes(term.id);
+    });
+    const loopSteps = Object.values(loopToday()).reduce((n, steps) => n + steps.length, 0);
+    return !reviewsLeft && loopSteps >= 1;
+  }
+
   // ----- 오늘 할 카드 목록 만들기 -----
   // 복습 예정 카드를 먼저(급한 상태 순), 남는 자리만큼 새 카드. 오늘 이미 본 카드는 다시 넣지 않는다.
   const URGENCY = { misconception: 0, confused: 1, unknown: 2, shaky: 3, known: 4 };
@@ -382,6 +425,7 @@ const Review = (() => {
     classify, nextBox, intervalFor, record, get, getToday, getSettings, setSettings,
     plan, counts, makeQuiz, today, addDays, useStore, useClock,
     getLog, ensureLog, stats, exportAll, importAll, planWrap, practice, markWrapped,
+    getLoop, saveLoop, markLoopStep, loopToday, goalMet, LOOP_STEPS,
     INTERVALS, MAINTAIN_BOX,
   };
 })();

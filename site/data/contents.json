@@ -33,223 +33,188 @@
       "sentences": [
         {
           "start_ms": 0,
-          "end_ms": 3700,
+          "end_ms": 4000,
           "speaker": "Anna",
           "en": "Ms. Weaver is giving new assignments out.",
           "ko": "웨버 씨가 새 업무를 나눠 주고 있어요."
         },
         {
-          "start_ms": 4540,
-          "end_ms": 7320,
+          "start_ms": 4440,
+          "end_ms": 7620,
           "speaker": "Anna",
           "en": "I am ready to take on anything she gives me.",
           "ko": "저는 무슨 일을 주시든 맡을 준비가 됐어요."
         },
         {
-          "start_ms": 8460,
-          "end_ms": 11360,
+          "start_ms": 8360,
+          "end_ms": 11680,
           "speaker": "Anna",
           "en": "Well, except reporting traffic from a helicopter.",
           "ko": "음, 헬리콥터에서 교통 상황을 보도하는 것만 빼고요."
         },
         {
-          "start_ms": 12420,
-          "end_ms": 13220,
+          "start_ms": 12300,
+          "end_ms": 13520,
           "speaker": "Anna",
           "en": "Wish me luck.",
           "ko": "행운을 빌어 주세요."
         },
         {
-          "start_ms": 14200,
-          "end_ms": 17640,
-          "speaker": "Professor Bot",
-          "en": "I wonder what Anna’s new assignment will be?",
-          "ko": "애나의 새 업무가 뭘까요?"
-        },
-        {
-          "start_ms": 18220,
-          "end_ms": 19280,
-          "speaker": "Professor Bot",
-          "en": "Professor Bot here!",
-          "ko": "로봇 교수예요!"
-        },
-        {
-          "start_ms": 19460,
-          "end_ms": 24260,
-          "speaker": "Professor Bot",
-          "en": "While you are watching, look for phrasal, or two-word verbs.",
-          "ko": "보는 동안 구동사, 그러니까 두 단어로 된 동사를 찾아보세요."
-        },
-        {
-          "start_ms": 25020,
-          "end_ms": 32720,
-          "speaker": "Professor Bot",
-          "en": "Some stay together, like “go back” and some can come apart, like “give [assignments] out.”",
-          "ko": "'go back'처럼 붙어 다니는 것도 있고, 'give [assignments] out'처럼 떨어질 수 있는 것도 있어요."
-        },
-        {
-          "start_ms": 33100,
-          "end_ms": 33800,
-          "speaker": "Professor Bot",
-          "en": "Good luck, Anna!",
-          "ko": "행운을 빌어요, 애나!"
-        },
-        {
-          "start_ms": 35240,
-          "end_ms": 44420,
+          "start_ms": 35140,
+          "end_ms": 44720,
           "speaker": "Ms. Weaver",
           "en": "So, as I said at the meeting last week, I have new assignments for everyone at The Studio.",
           "ko": "자, 지난주 회의에서 말했듯이 스튜디오 모든 사람에게 새 업무가 있어요."
         },
         {
-          "start_ms": 45200,
-          "end_ms": 47820,
+          "start_ms": 45040,
+          "end_ms": 48180,
           "speaker": "Ms. Weaver",
           "en": "Anna, you're good at asking questions.",
           "ko": "애나, 당신은 질문을 잘하죠."
         },
         {
-          "start_ms": 48700,
-          "end_ms": 52600,
+          "start_ms": 48620,
+          "end_ms": 52900,
           "speaker": "Ms. Weaver",
           "en": "So, I want you to go back to hosting and reporting.",
           "ko": "그래서 다시 진행과 보도를 맡아 줬으면 해요."
         },
         {
-          "start_ms": 53200,
-          "end_ms": 54760,
+          "start_ms": 53100,
+          "end_ms": 54780,
           "speaker": "Anna",
           "en": "That sounds great.",
           "ko": "좋아요."
         },
         {
-          "start_ms": 54760,
-          "end_ms": 57380,
+          "start_ms": 54780,
+          "end_ms": 57700,
           "speaker": "Ms. Weaver",
           "en": "You're also a team player.",
           "ko": "그리고 당신은 함께 일을 잘하는 사람이기도 하죠."
         },
         {
-          "start_ms": 58420,
-          "end_ms": 61140,
+          "start_ms": 58320,
+          "end_ms": 61360,
           "speaker": "Ms. Weaver",
           "en": "So, I want you team up with someone ...",
           "ko": "그래서 누군가와 팀을 이뤘으면 해요..."
         },
         {
-          "start_ms": 61480,
-          "end_ms": 62800,
+          "start_ms": 61360,
+          "end_ms": 63100,
           "speaker": "Anna",
           "en": "That sounds even better!",
           "ko": "더 좋네요!"
         },
         {
-          "start_ms": 64000,
-          "end_ms": 68520,
+          "start_ms": 63880,
+          "end_ms": 68820,
           "speaker": "Ms. Weaver",
           "en": "... someone who is very \"different\" from you.",
           "ko": "...당신과 아주 '다른' 사람이랑요."
         },
         {
-          "start_ms": 69020,
-          "end_ms": 72460,
+          "start_ms": 68900,
+          "end_ms": 72760,
           "speaker": "Anna",
           "en": "That sounds ... what do you mean \"different\"?",
           "ko": "좋은데요... '다르다'는 게 무슨 뜻이에요?"
         },
         {
-          "start_ms": 73480,
-          "end_ms": 76800,
+          "start_ms": 73380,
+          "end_ms": 77080,
           "speaker": "Ms. Weaver",
           "en": "Well, you are very cheerful, you're a people person.",
           "ko": "음, 당신은 아주 밝고 사람들과 잘 어울리잖아요."
         },
         {
-          "start_ms": 77860,
-          "end_ms": 82060,
+          "start_ms": 77760,
+          "end_ms": 82080,
           "speaker": "Ms. Weaver",
           "en": "I want you to team up with someone who ... isn't.",
           "ko": "그런데... 그렇지 않은 사람과 팀을 이뤘으면 해요."
         },
         {
-          "start_ms": 82640,
-          "end_ms": 86340,
+          "start_ms": 82080,
+          "end_ms": 86640,
           "speaker": "Anna",
           "en": "Ms. Weaver, I will find that person.",
           "ko": "웨버 씨, 그 사람을 찾아낼게요."
         },
         {
-          "start_ms": 87360,
-          "end_ms": 88120,
+          "start_ms": 87200,
+          "end_ms": 88260,
           "speaker": "Mimi",
           "en": "Excuse me.",
           "ko": "실례합니다."
         },
         {
-          "start_ms": 88360,
-          "end_ms": 89160,
+          "start_ms": 88260,
+          "end_ms": 89440,
           "speaker": "Mimi",
           "en": "Are you using this chair?",
           "ko": "이 의자 쓰고 계세요?"
         },
         {
-          "start_ms": 89960,
-          "end_ms": 90560,
+          "start_ms": 89860,
+          "end_ms": 90880,
           "speaker": "Pete",
           "en": "Yes.",
           "ko": "네."
         },
         {
-          "start_ms": 91700,
-          "end_ms": 92680,
+          "start_ms": 91580,
+          "end_ms": 92960,
           "speaker": "Anna",
           "en": "Pete, hi!",
           "ko": "피트, 안녕!"
         },
         {
-          "start_ms": 93320,
-          "end_ms": 94340,
+          "start_ms": 93240,
+          "end_ms": 94640,
           "speaker": "Anna",
           "en": "Thanks for meeting me.",
           "ko": "만나 줘서 고마워요."
         },
         {
-          "start_ms": 94940,
-          "end_ms": 95320,
+          "start_ms": 94780,
+          "end_ms": 95440,
           "speaker": "Pete",
           "en": "Sure.",
           "ko": "그럼요."
         },
         {
-          "start_ms": 95460,
-          "end_ms": 97560,
+          "start_ms": 95440,
+          "end_ms": 97840,
           "speaker": "Pete",
           "en": "But I don’t have lots of time, Anna.",
           "ko": "그런데 시간이 많지 않아요, 애나."
         },
         {
-          "start_ms": 97980,
-          "end_ms": 99880,
+          "start_ms": 97840,
+          "end_ms": 100180,
           "speaker": "Pete",
           "en": "I’m busy looking for work.",
           "ko": "일자리를 찾느라 바빠서요."
         },
         {
-          "start_ms": 100400,
-          "end_ms": 104780,
+          "start_ms": 100360,
+          "end_ms": 105060,
           "speaker": "Anna",
           "en": "Pete, you can tear these want ads up and throw them away!",
           "ko": "피트, 이 구인 광고는 찢어서 버려도 돼요!"
         },
         {
-          "start_ms": 105580,
-          "end_ms": 106340,
+          "start_ms": 105400,
+          "end_ms": 106640,
           "speaker": "Anna",
           "en": "I have good news!",
           "ko": "좋은 소식이 있어요!"
         },
         {
-          "start_ms": 107160,
+          "start_ms": 107040,
           "end_ms": 109540,
           "speaker": "Pete",
           "en": "Anna, I was working on that crossword puzzle.",
@@ -257,90 +222,90 @@
         },
         {
           "start_ms": 109540,
-          "end_ms": 110300,
+          "end_ms": 110360,
           "speaker": "Anna",
           "en": "Oh.",
           "ko": "아."
         },
         {
-          "start_ms": 110480,
-          "end_ms": 110880,
+          "start_ms": 110360,
+          "end_ms": 111180,
           "speaker": "Anna",
           "en": "Sorry.",
           "ko": "미안해요."
         },
         {
-          "start_ms": 111300,
-          "end_ms": 111620,
+          "start_ms": 111180,
+          "end_ms": 111820,
           "speaker": "Anna",
           "en": "Sorry.",
           "ko": "미안해요."
         },
         {
-          "start_ms": 111940,
-          "end_ms": 114360,
+          "start_ms": 111820,
+          "end_ms": 114660,
           "speaker": "Anna",
           "en": "Pete, forget about the crossword puzzle.",
           "ko": "피트, 십자말풀이는 잊어요."
         },
         {
-          "start_ms": 114860,
-          "end_ms": 116800,
+          "start_ms": 114740,
+          "end_ms": 117100,
           "speaker": "Anna",
           "en": "I have a job offer for you!",
           "ko": "당신한테 일자리 제안이 있어요!"
         },
         {
-          "start_ms": 117260,
-          "end_ms": 117700,
+          "start_ms": 117140,
+          "end_ms": 118000,
           "speaker": "Pete",
           "en": "I'm listening.",
           "ko": "듣고 있어요."
         },
         {
-          "start_ms": 118260,
-          "end_ms": 122800,
+          "start_ms": 118140,
+          "end_ms": 123100,
           "speaker": "Anna",
           "en": "My boss wants me to team up with someone to host a talk show.",
           "ko": "우리 상사가 저더러 누군가와 팀을 이뤄 토크쇼를 진행하래요."
         },
         {
-          "start_ms": 123340,
-          "end_ms": 126100,
+          "start_ms": 123280,
+          "end_ms": 126400,
           "speaker": "Anna",
           "en": "But the person must be different from me.",
           "ko": "그런데 그 사람은 저와 달라야 한대요."
         },
         {
-          "start_ms": 126560,
-          "end_ms": 127980,
+          "start_ms": 126460,
+          "end_ms": 128280,
           "speaker": "Anna",
           "en": "So, I thought of you.",
           "ko": "그래서 당신이 생각났어요."
         },
         {
-          "start_ms": 128680,
-          "end_ms": 129660,
+          "start_ms": 128560,
+          "end_ms": 129960,
           "speaker": "Pete",
           "en": "Different from you?",
           "ko": "당신과 다르다고요?"
         },
         {
-          "start_ms": 130320,
-          "end_ms": 130880,
+          "start_ms": 130200,
+          "end_ms": 131180,
           "speaker": "Pete",
           "en": "What do you mean?",
           "ko": "무슨 뜻이에요?"
         },
         {
-          "start_ms": 131520,
-          "end_ms": 133960,
+          "start_ms": 131400,
+          "end_ms": 134140,
           "speaker": "Anna",
           "en": "I'm sorry, Pete, I don't have time right now.",
           "ko": "미안해요, 피트, 지금은 시간이 없어요."
         },
         {
-          "start_ms": 134260,
+          "start_ms": 134140,
           "end_ms": 135800,
           "speaker": "Anna",
           "en": "Here's my boss's address.",
@@ -348,69 +313,41 @@
         },
         {
           "start_ms": 135800,
-          "end_ms": 138540,
+          "end_ms": 138840,
           "speaker": "Anna",
           "en": "Your interview is tomorrow morning at 10 am.",
           "ko": "면접은 내일 아침 10시예요."
         },
         {
-          "start_ms": 139500,
-          "end_ms": 141760,
+          "start_ms": 139440,
+          "end_ms": 142060,
           "speaker": "Pete",
           "en": "But what do you mean “different”?",
           "ko": "그런데 '다르다'는 게 무슨 뜻이에요?"
         },
         {
-          "start_ms": 142460,
-          "end_ms": 143800,
+          "start_ms": 142320,
+          "end_ms": 144100,
           "speaker": "Anna",
           "en": "Just be yourself, Pete.",
           "ko": "그냥 평소 모습대로 해요, 피트."
         },
         {
-          "start_ms": 144560,
-          "end_ms": 145540,
+          "start_ms": 144440,
+          "end_ms": 145940,
           "speaker": "Anna",
           "en": "Just be yourself.",
           "ko": "그냥 당신답게 해요."
         },
         {
-          "start_ms": 146380,
-          "end_ms": 149760,
-          "speaker": "Professor Bot",
-          "en": "Did you find any two-word verbs?",
-          "ko": "두 단어로 된 동사를 찾았나요?"
-        },
-        {
-          "start_ms": 150160,
-          "end_ms": 151440,
-          "speaker": "Professor Bot",
-          "en": "Here’s one example.",
-          "ko": "예를 하나 들어 볼게요."
-        },
-        {
-          "start_ms": 151980,
-          "end_ms": 154900,
-          "speaker": "Professor Bot",
-          "en": "Pete can throw the want ads away!",
-          "ko": "피트는 구인 광고를 버릴 수 있어요!"
-        },
-        {
-          "start_ms": 155440,
-          "end_ms": 158300,
-          "speaker": "Professor Bot",
-          "en": "Throw away is a two-word verb.",
-          "ko": "'throw away'는 두 단어로 된 동사예요."
-        },
-        {
-          "start_ms": 159600,
-          "end_ms": 161340,
+          "start_ms": 159420,
+          "end_ms": 161620,
           "speaker": "Ms. Weaver",
           "en": "Thanks for coming in, Pete.",
           "ko": "와 줘서 고마워요, 피트."
         },
         {
-          "start_ms": 162040,
+          "start_ms": 161920,
           "end_ms": 164020,
           "speaker": "Pete",
           "en": "Thanks for the opportunity, Ms. Weaver.",
@@ -418,41 +355,41 @@
         },
         {
           "start_ms": 164020,
-          "end_ms": 170600,
+          "end_ms": 170900,
           "speaker": "Ms. Weaver",
           "en": "I need to find out if you have the skills for this job.",
           "ko": "이 일에 필요한 능력이 있는지 알아봐야 해요."
         },
         {
-          "start_ms": 171080,
-          "end_ms": 175020,
+          "start_ms": 170960,
+          "end_ms": 175300,
           "speaker": "Ms. Weaver",
           "en": "And I want you to be completely honest.",
           "ko": "그리고 아주 솔직하게 말해 줬으면 해요."
         },
         {
-          "start_ms": 175840,
-          "end_ms": 176680,
+          "start_ms": 175860,
+          "end_ms": 177000,
           "speaker": "Pete",
           "en": "Okay.",
           "ko": "좋아요."
         },
         {
-          "start_ms": 177140,
-          "end_ms": 180260,
+          "start_ms": 177020,
+          "end_ms": 180540,
           "speaker": "Ms. Weaver",
           "en": "First, let's talk about your personal skills.",
           "ko": "먼저 대인 관계 능력에 대해 얘기해 봐요."
         },
         {
-          "start_ms": 181040,
-          "end_ms": 185060,
+          "start_ms": 180920,
+          "end_ms": 185340,
           "speaker": "Ms. Weaver",
           "en": "Pete, are you a people person?",
           "ko": "피트, 사람들과 잘 어울리는 편인가요?"
         },
         {
-          "start_ms": 185920,
+          "start_ms": 187000,
           "end_ms": 192840,
           "speaker": "Pete",
           "en": "Well, okay, sometimes I think people talk too much.",
@@ -460,115 +397,146 @@
         },
         {
           "start_ms": 192840,
-          "end_ms": 199180,
+          "end_ms": 199440,
           "speaker": "Ms. Weaver",
           "en": "Pete, what work of yours are you most proud of?",
           "ko": "피트, 지금까지 한 일 중에 가장 자랑스러운 건 뭐예요?"
         },
         {
-          "start_ms": 199560,
-          "end_ms": 204000,
+          "start_ms": 199440,
+          "end_ms": 204300,
           "speaker": "Pete",
           "en": "Last year, I locked myself in a cabin and wrote a book.",
           "ko": "작년에 오두막에 틀어박혀서 책을 한 권 썼어요."
         },
         {
-          "start_ms": 205220,
-          "end_ms": 207640,
+          "start_ms": 204880,
+          "end_ms": 207940,
           "speaker": "Pete",
           "en": "I didn't speak to anybody the entire time!",
           "ko": "그동안 아무하고도 말을 안 했어요!"
         },
         {
-          "start_ms": 208760,
-          "end_ms": 210960,
+          "start_ms": 208640,
+          "end_ms": 211260,
           "speaker": "Pete",
           "en": "It was the best two months of my life.",
           "ko": "제 인생 최고의 두 달이었죠."
         },
         {
-          "start_ms": 211980,
-          "end_ms": 212700,
+          "start_ms": 211860,
+          "end_ms": 213000,
           "speaker": "Ms. Weaver",
           "en": "Okay.",
           "ko": "알겠어요."
         },
         {
-          "start_ms": 213740,
-          "end_ms": 215660,
+          "start_ms": 213620,
+          "end_ms": 215960,
           "speaker": "Ms. Weaver",
           "en": "I think I’ve heard enough.",
           "ko": "충분히 들은 것 같네요."
         },
         {
-          "start_ms": 217580,
+          "start_ms": 217460,
           "end_ms": 218300,
           "speaker": "Anna",
           "en": "Hey!",
           "ko": "저기요!"
         },
         {
-          "start_ms": 219360,
-          "end_ms": 223340,
+          "start_ms": 218300,
+          "end_ms": 223640,
           "speaker": "Anna",
           "en": "Hey, Pete, how was the interview with Ms. Weaver?",
           "ko": "피트, 웨버 씨와 면접은 어땠어요?"
         },
         {
-          "start_ms": 224040,
-          "end_ms": 229800,
+          "start_ms": 223980,
+          "end_ms": 230100,
           "speaker": "Pete",
           "en": "Well, she said I was grumpy and not good with people.",
           "ko": "음, 제가 까칠하고 사람들과 잘 못 어울린대요."
         },
         {
-          "start_ms": 230380,
-          "end_ms": 231100,
+          "start_ms": 230220,
+          "end_ms": 231380,
           "speaker": "Anna",
           "en": "And … ?",
           "ko": "그래서요...?"
         },
         {
-          "start_ms": 231600,
-          "end_ms": 233720,
+          "start_ms": 231720,
+          "end_ms": 234060,
           "speaker": "Pete",
           "en": "And, I got the job!",
           "ko": "그래서 합격했어요!"
         },
         {
-          "start_ms": 234180,
-          "end_ms": 234720,
+          "start_ms": 234060,
+          "end_ms": 234880,
           "speaker": "Anna",
           "en": "I knew it!",
           "ko": "그럴 줄 알았어요!"
         },
         {
-          "start_ms": 235440,
-          "end_ms": 235840,
+          "start_ms": 234880,
+          "end_ms": 235740,
           "speaker": "Anna",
           "en": "Congratulations!",
           "ko": "축하해요!"
         },
         {
-          "start_ms": 236440,
-          "end_ms": 237720,
+          "start_ms": 236240,
+          "end_ms": 238020,
           "speaker": "Anna",
           "en": "Let's go celebrate.",
           "ko": "축하하러 가요."
         },
         {
-          "start_ms": 238480,
-          "end_ms": 239140,
+          "start_ms": 238360,
+          "end_ms": 239400,
           "speaker": "Pete",
           "en": "Okay!",
           "ko": "좋아요!"
+        }
+      ],
+      "scenes": [
+        {
+          "from": 0,
+          "to": 3
         },
         {
-          "start_ms": 240160,
-          "end_ms": 243640,
-          "speaker": "Professor Bot",
-          "en": "Did you find more two-word verbs?",
-          "ko": "두 단어로 된 동사를 더 찾았나요?"
+          "from": 4,
+          "to": 10
+        },
+        {
+          "from": 11,
+          "to": 18
+        },
+        {
+          "from": 19,
+          "to": 25
+        },
+        {
+          "from": 26,
+          "to": 35
+        },
+        {
+          "from": 36,
+          "to": 43
+        },
+        {
+          "from": 44,
+          "to": 50
+        },
+        {
+          "from": 51,
+          "to": 57
+        },
+        {
+          "from": 58,
+          "to": 66
         }
       ]
     },
@@ -590,472 +558,522 @@
       "reviewed": true,
       "sentences": [
         {
-          "start_ms": 920,
-          "end_ms": 8800,
+          "start_ms": 0,
+          "end_ms": 9120,
           "en": "Ask one hundred people whether they love to travel and most of them will probably say yes.",
           "ko": "100명에게 여행을 좋아하느냐고 물으면 아마 대부분 그렇다고 할 거예요."
         },
         {
-          "start_ms": 10900,
-          "end_ms": 14060,
+          "start_ms": 10770,
+          "end_ms": 14360,
           "en": "Discovering a new place can be fun and exciting.",
           "ko": "새로운 곳을 발견하는 건 재미있고 신나는 일이죠."
         },
         {
-          "start_ms": 15080,
-          "end_ms": 19660,
+          "start_ms": 14960,
+          "end_ms": 19960,
           "en": "But getting to that place is often a lot less enjoyable.",
           "ko": "하지만 그곳까지 가는 길은 그만큼 즐겁지 않을 때가 많아요."
         },
         {
-          "start_ms": 21160,
-          "end_ms": 23980,
+          "start_ms": 20980,
+          "end_ms": 24280,
           "en": "Flying is a popular travel method.",
           "ko": "비행기는 많이 쓰는 여행 수단이에요."
         },
         {
-          "start_ms": 24560,
-          "end_ms": 27540,
+          "start_ms": 24320,
+          "end_ms": 27840,
           "en": "But airports can be frustrating places.",
           "ko": "그런데 공항은 답답한 곳일 수 있어요."
         },
         {
-          "start_ms": 28700,
-          "end_ms": 34120,
+          "start_ms": 28580,
+          "end_ms": 34420,
           "en": "Having to speak a foreign language in an airport can add to the frustration.",
           "ko": "공항에서 외국어로 말해야 하면 답답함이 더 커지기도 하고요."
         },
         {
-          "start_ms": 35600,
-          "end_ms": 43660,
+          "start_ms": 35480,
+          "end_ms": 44060,
           "en": "Today, we will share some English phrases that can help you survive any airport experience!",
           "ko": "오늘은 어떤 공항에서든 버틸 수 있게 도와줄 영어 표현을 나눠 볼게요!"
         },
         {
-          "start_ms": 45220,
-          "end_ms": 47040,
+          "start_ms": 45100,
+          "end_ms": 47360,
           "en": "Let’s begin with check-in.",
           "ko": "먼저 체크인부터 시작해요."
         },
         {
-          "start_ms": 48360,
-          "end_ms": 55660,
+          "start_ms": 48280,
+          "end_ms": 55960,
           "en": "At an airport, check-in is where you go to let the airline know that you have arrived.",
           "ko": "공항에서 체크인은 항공사에 도착했다고 알리러 가는 곳이에요."
         },
         {
-          "start_ms": 56420,
-          "end_ms": 60520,
+          "start_ms": 56300,
+          "end_ms": 60820,
           "en": "At check-in, you can also get your boarding pass.",
           "ko": "체크인할 때 탑승권도 받을 수 있어요."
         },
         {
-          "start_ms": 61440,
-          "end_ms": 64740,
+          "start_ms": 61300,
+          "end_ms": 65040,
           "en": "The document has your flight information on it.",
           "ko": "탑승권에는 비행 정보가 적혀 있어요."
         },
         {
-          "start_ms": 65500,
-          "end_ms": 67820,
+          "start_ms": 65340,
+          "end_ms": 68120,
           "en": "It is proof that you purchased the flight.",
           "ko": "항공권을 샀다는 증거죠."
         },
         {
-          "start_ms": 69120,
-          "end_ms": 71840,
+          "start_ms": 69000,
+          "end_ms": 72140,
           "en": "You cannot get on the plane without one.",
           "ko": "탑승권이 없으면 비행기를 탈 수 없어요."
         },
         {
-          "start_ms": 73000,
-          "end_ms": 80220,
+          "start_ms": 72860,
+          "end_ms": 80520,
           "en": "Many airports offer two ways to check in: through a machine or with an airline employee.",
           "ko": "많은 공항에서 체크인하는 방법이 두 가지예요. 기계로 하거나 항공사 직원에게 하는 거죠."
         },
         {
-          "start_ms": 81500,
-          "end_ms": 87280,
+          "start_ms": 81380,
+          "end_ms": 87600,
           "en": "Here is what you’ll be asked if you get your boarding pass from the employee:",
           "ko": "직원에게 탑승권을 받을 때 듣게 될 말은 이거예요."
         },
         {
-          "start_ms": 88540,
-          "end_ms": 89340,
+          "start_ms": 88420,
+          "end_ms": 89640,
           "en": "Hello!",
           "ko": "안녕하세요!"
         },
         {
-          "start_ms": 89840,
-          "end_ms": 91040,
+          "start_ms": 89720,
+          "end_ms": 91340,
           "en": "May I see your ID?",
           "ko": "신분증 좀 보여 주시겠어요?"
         },
         {
-          "start_ms": 92200,
-          "end_ms": 99260,
+          "start_ms": 92080,
+          "end_ms": 99780,
           "en": "Your ID is your identification, such as a passport or driving document.",
           "ko": "ID는 여권이나 운전면허증 같은 신분증이에요."
         },
         {
-          "start_ms": 100400,
-          "end_ms": 106940,
+          "start_ms": 100220,
+          "end_ms": 107260,
           "en": "You can answer, “Sure” or “Here you go” and give the person the document.",
           "ko": "\"Sure\"나 \"Here you go\"라고 대답하고 서류를 건네면 돼요."
         },
         {
-          "start_ms": 107680,
-          "end_ms": 116360,
+          "start_ms": 107840,
+          "end_ms": 116660,
           "en": "If you use the machine, you can enter the ticket or reservation number you received when you purchased the flight.",
           "ko": "기계를 쓰면 항공권을 살 때 받은 티켓 번호나 예약 번호를 입력하면 돼요."
         },
         {
-          "start_ms": 117520,
-          "end_ms": 121420,
+          "start_ms": 117340,
+          "end_ms": 121720,
           "en": "At the check-in area, you can also check your bags.",
           "ko": "체크인하는 곳에서 짐도 부칠 수 있어요."
         },
         {
-          "start_ms": 122240,
-          "end_ms": 131480,
+          "start_ms": 122120,
+          "end_ms": 131760,
           "en": "This means giving your bags, also called luggage, to an airline employee to be stored during the flight.",
           "ko": "가방, 다른 말로 짐을 항공사 직원에게 맡겨서 비행하는 동안 보관하게 한다는 뜻이에요."
         },
         {
-          "start_ms": 132840,
-          "end_ms": 141920,
+          "start_ms": 132740,
+          "end_ms": 142160,
           "en": "Bags you give to the employee are called \"checked bags,\" \"checked baggage\" or \"checked luggage.\"",
           "ko": "직원에게 맡기는 가방은 'checked bags', 'checked baggage', 'checked luggage'라고 해요."
         },
         {
-          "start_ms": 143220,
-          "end_ms": 149600,
+          "start_ms": 143120,
+          "end_ms": 149920,
           "en": "Here’s the question airline employees ask to find out if you want to check bags:",
           "ko": "짐을 부칠지 알아보려고 항공사 직원이 묻는 말은 이거예요."
         },
         {
-          "start_ms": 150780,
-          "end_ms": 153700,
+          "start_ms": 150680,
+          "end_ms": 153980,
           "en": "Will you be checking any bags today?",
           "ko": "오늘 부치실 짐 있으세요?"
         },
         {
-          "start_ms": 154580,
-          "end_ms": 157880,
+          "start_ms": 154540,
+          "end_ms": 158180,
           "en": "Or, they may say it this way:",
           "ko": "이렇게 말하기도 해요."
         },
         {
-          "start_ms": 158920,
-          "end_ms": 161620,
+          "start_ms": 158800,
+          "end_ms": 161900,
           "en": "Do you have any checked bags today?",
           "ko": "오늘 부치는 짐 있으세요?"
         },
         {
-          "start_ms": 163180,
-          "end_ms": 167540,
+          "start_ms": 163080,
+          "end_ms": 167840,
           "en": "You can answer yes or no, and tell them how many:",
           "ko": "있다 없다로 대답하고 몇 개인지 말하면 돼요."
         },
         {
-          "start_ms": 168560,
-          "end_ms": 170640,
+          "start_ms": 168440,
+          "end_ms": 170940,
           "en": "Yes, just this one.",
           "ko": "네, 이거 하나요."
         },
         {
-          "start_ms": 171660,
-          "end_ms": 177120,
+          "start_ms": 171540,
+          "end_ms": 177420,
           "en": "They will then tell you to put the bag on a machine to measure the weight.",
           "ko": "그러면 무게를 재는 기계에 가방을 올려 달라고 할 거예요."
         },
         {
-          "start_ms": 178060,
-          "end_ms": 179540,
+          "start_ms": 177980,
+          "end_ms": 179840,
           "en": "Here’s what they will say:",
           "ko": "이렇게 말할 거예요."
         },
         {
-          "start_ms": 180500,
-          "end_ms": 183200,
+          "start_ms": 180360,
+          "end_ms": 183520,
           "en": "Please place your bag on the scale.",
           "ko": "가방을 저울에 올려 주세요."
         },
         {
-          "start_ms": 184340,
-          "end_ms": 190060,
+          "start_ms": 184220,
+          "end_ms": 190360,
           "en": "But some bags are small enough to fit in the passenger area of the plane.",
           "ko": "그런데 어떤 가방은 작아서 비행기 객실에 들고 탈 수 있어요."
         },
         {
-          "start_ms": 190840,
-          "end_ms": 198580,
+          "start_ms": 190740,
+          "end_ms": 198880,
           "en": "The bag you keep with you on the plane is called a “carry-on bag” or simply a “carry-on.”",
           "ko": "비행기에 들고 타는 가방은 'carry-on bag', 줄여서 'carry-on'이라고 해요."
         },
         {
-          "start_ms": 200440,
-          "end_ms": 206960,
+          "start_ms": 200280,
+          "end_ms": 207280,
           "en": "Sadly, there are times when your carry-on does not meet weight or size restrictions.",
           "ko": "안타깝게도 기내 가방이 무게나 크기 제한을 넘을 때가 있어요."
         },
         {
-          "start_ms": 208100,
-          "end_ms": 216920,
+          "start_ms": 207940,
+          "end_ms": 217240,
           "en": "In such cases, you’ll hear something like this: I’m sorry but your bag is too heavy.",
           "ko": "그럴 때는 이런 말을 듣게 돼요. 죄송하지만 가방이 너무 무거워요."
         },
         {
-          "start_ms": 217480,
-          "end_ms": 218740,
+          "start_ms": 217340,
+          "end_ms": 219040,
           "en": "You’ll have to check it.",
           "ko": "부치셔야 해요."
         },
         {
-          "start_ms": 220000,
-          "end_ms": 220820,
+          "start_ms": 219840,
+          "end_ms": 221120,
           "en": "I’m sorry.",
           "ko": "죄송해요."
         },
         {
-          "start_ms": 221320,
-          "end_ms": 222520,
+          "start_ms": 221200,
+          "end_ms": 222820,
           "en": "Your bag is too big.",
           "ko": "가방이 너무 커요."
         },
         {
-          "start_ms": 222980,
-          "end_ms": 223860,
+          "start_ms": 222840,
+          "end_ms": 224160,
           "en": "You’ll have to check it.",
           "ko": "부치셔야 해요."
         },
         {
-          "start_ms": 225980,
-          "end_ms": 228580,
+          "start_ms": 225840,
+          "end_ms": 228880,
           "en": "OK, so you’ve finished at the check-in area.",
           "ko": "자, 체크인을 마쳤어요."
         },
         {
-          "start_ms": 229460,
-          "end_ms": 232280,
+          "start_ms": 229300,
+          "end_ms": 232560,
           "en": "Now it’s time to go through security.",
           "ko": "이제 보안 검색대를 지날 차례예요."
         },
         {
-          "start_ms": 233280,
-          "end_ms": 239880,
+          "start_ms": 233140,
+          "end_ms": 240180,
           "en": "In line, you may hear a security employee announce this to the crowd:",
           "ko": "줄을 서 있으면 보안 직원이 사람들에게 이렇게 안내할 수 있어요."
         },
         {
-          "start_ms": 241040,
-          "end_ms": 244920,
+          "start_ms": 240920,
+          "end_ms": 245220,
           "en": "Please have your IDs and boarding passes out.",
           "ko": "신분증과 탑승권을 꺼내 주세요."
         },
         {
-          "start_ms": 245920,
-          "end_ms": 251040,
+          "start_ms": 245800,
+          "end_ms": 251340,
           "en": "That means have your documents ready to show the security person.",
           "ko": "보안 직원에게 보여 줄 서류를 준비하라는 뜻이에요."
         },
         {
-          "start_ms": 252120,
-          "end_ms": 256100,
+          "start_ms": 251980,
+          "end_ms": 256380,
           "en": "Security workers also check bags and other belongings.",
           "ko": "보안 직원은 가방과 다른 소지품도 검사해요."
         },
         {
-          "start_ms": 256920,
-          "end_ms": 262740,
+          "start_ms": 256760,
+          "end_ms": 263060,
           "en": "Sometimes, you have to place such things in a plastic container called a “bin.”",
           "ko": "가끔은 소지품을 '빈(bin)'이라는 플라스틱 바구니에 넣어야 해요."
         },
         {
-          "start_ms": 264280,
-          "end_ms": 270000,
+          "start_ms": 264140,
+          "end_ms": 270340,
           "en": "Security workers may ask if you have any liquids, foods or medicines:",
           "ko": "보안 직원이 액체나 음식, 약이 있는지 물을 수 있어요."
         },
         {
-          "start_ms": 271200,
-          "end_ms": 273500,
+          "start_ms": 271260,
+          "end_ms": 273820,
           "en": "Are you traveling with any liquids?",
           "ko": "액체류 가지고 계세요?"
         },
         {
-          "start_ms": 276180,
-          "end_ms": 278120,
+          "start_ms": 276060,
+          "end_ms": 278420,
           "en": "OK, you made it through security with ease.",
           "ko": "자, 보안 검색대를 무사히 통과했어요."
         },
         {
-          "start_ms": 279240,
-          "end_ms": 279620,
+          "start_ms": 279120,
+          "end_ms": 279960,
           "en": "Congratulations!",
           "ko": "축하해요!"
         },
         {
-          "start_ms": 280540,
-          "end_ms": 286600,
+          "start_ms": 280420,
+          "end_ms": 286900,
           "en": "Time to go to your gate – the seating area where you wait for your plane to board.",
           "ko": "이제 탑승구로 갈 시간이에요. 비행기 탑승을 기다리며 앉아 있는 곳이죠."
         },
         {
-          "start_ms": 287660,
-          "end_ms": 291140,
+          "start_ms": 287560,
+          "end_ms": 291440,
           "en": "At the gate, here’s an announcement you might hear:",
           "ko": "탑승구에서는 이런 안내 방송을 들을 수 있어요."
         },
         {
-          "start_ms": 292420,
-          "end_ms": 301240,
+          "start_ms": 292140,
+          "end_ms": 301520,
           "en": "Attention passengers on flight 95 to Chicago: Your flight has been delayed due to weather conditions.",
           "ko": "시카고행 95편 승객 여러분께 알립니다. 기상 상황으로 비행기 출발이 늦어졌습니다."
         },
         {
-          "start_ms": 302540,
-          "end_ms": 304240,
+          "start_ms": 302420,
+          "end_ms": 304540,
           "en": "The new departure time is 5:45.",
           "ko": "새 출발 시각은 5시 45분입니다."
         },
         {
-          "start_ms": 306800,
-          "end_ms": 310700,
+          "start_ms": 306680,
+          "end_ms": 311020,
           "en": "So, your flight is delayed three hours.",
           "ko": "그러니까 비행기가 세 시간 늦어진 거예요."
         },
         {
-          "start_ms": 311700,
-          "end_ms": 315260,
+          "start_ms": 311600,
+          "end_ms": 315540,
           "en": "But, let’s say Chicago is not your final destination.",
           "ko": "그런데 시카고가 최종 목적지가 아니라고 해 볼게요."
         },
         {
-          "start_ms": 316580,
-          "end_ms": 323180,
+          "start_ms": 316180,
+          "end_ms": 323480,
           "en": "You are supposed to fly another plane from Chicago to your final destination.",
           "ko": "시카고에서 다른 비행기를 타고 최종 목적지로 가야 하는 거죠."
         },
         {
-          "start_ms": 324440,
-          "end_ms": 328160,
+          "start_ms": 324320,
+          "end_ms": 328460,
           "en": "That is called a “layover” in American English.",
           "ko": "미국 영어에서는 이걸 'layover(경유)'라고 해요."
         },
         {
-          "start_ms": 328840,
-          "end_ms": 332740,
+          "start_ms": 329180,
+          "end_ms": 333040,
           "en": "You might also hear it called a “stopover.”",
           "ko": "'stopover'라고 하는 것도 들을 수 있어요."
         },
         {
-          "start_ms": 333760,
-          "end_ms": 338120,
+          "start_ms": 333640,
+          "end_ms": 338420,
           "en": "The delay means you will miss your flight out of Chicago.",
           "ko": "출발이 늦어지면 시카고에서 갈아탈 비행기를 놓치게 돼요."
         },
         {
-          "start_ms": 339300,
-          "end_ms": 340300,
+          "start_ms": 339180,
+          "end_ms": 340600,
           "en": "But don’t worry!",
           "ko": "하지만 걱정 마세요!"
         },
         {
-          "start_ms": 340760,
-          "end_ms": 344160,
+          "start_ms": 340640,
+          "end_ms": 344480,
           "en": "Just let the person at the airline counter know:",
           "ko": "항공사 카운터 직원에게 이렇게 말하면 돼요."
         },
         {
-          "start_ms": 345540,
-          "end_ms": 349180,
+          "start_ms": 345400,
+          "end_ms": 349480,
           "en": "Hi, I missed my connecting flight to Los Angeles.",
           "ko": "안녕하세요, 로스앤젤레스로 가는 연결편을 놓쳤어요."
         },
         {
-          "start_ms": 349980,
-          "end_ms": 350800,
+          "start_ms": 349840,
+          "end_ms": 351080,
           "en": "What should I do?",
           "ko": "어떻게 해야 하나요?"
         },
         {
-          "start_ms": 352280,
-          "end_ms": 361480,
+          "start_ms": 352160,
+          "end_ms": 361780,
           "en": "Airlines generally have solutions ready, such as putting you on the next flight or putting you in a hotel for the night.",
           "ko": "항공사는 보통 다음 비행기에 태워 주거나 그날 밤 호텔을 잡아 주는 식으로 해결책을 마련해 두고 있어요."
         },
         {
-          "start_ms": 362900,
-          "end_ms": 367800,
+          "start_ms": 362800,
+          "end_ms": 368120,
           "en": "After an international flight, you will be directed through customs.",
           "ko": "국제선을 타고 내리면 세관 쪽으로 안내받게 돼요."
         },
         {
-          "start_ms": 368880,
-          "end_ms": 374780,
+          "start_ms": 368760,
+          "end_ms": 375100,
           "en": "That is where government officers approve or reject entrance into the country.",
           "ko": "정부 직원이 입국을 허가하거나 거절하는 곳이에요."
         },
         {
-          "start_ms": 376040,
-          "end_ms": 383000,
+          "start_ms": 376180,
+          "end_ms": 383060,
           "en": "The customs officer will ask for your passport and may or may not have questions.",
           "ko": "세관 직원이 여권을 달라고 하고, 질문을 할 수도 있고 안 할 수도 있어요."
         },
         {
-          "start_ms": 383000,
-          "end_ms": 388060,
+          "start_ms": 383060,
+          "end_ms": 388340,
           "en": "Here are five common questions you might hear at customs:",
           "ko": "세관에서 자주 듣는 질문 다섯 가지를 알려 드릴게요."
         },
         {
-          "start_ms": 389400,
-          "end_ms": 391840,
+          "start_ms": 389260,
+          "end_ms": 392140,
           "en": "What is the purpose of your trip?",
           "ko": "여행 목적이 뭔가요?"
         },
         {
-          "start_ms": 392820,
-          "end_ms": 394980,
+          "start_ms": 392740,
+          "end_ms": 395280,
           "en": "How long do you intend to stay?",
           "ko": "얼마나 머무를 예정인가요?"
         },
         {
-          "start_ms": 396140,
-          "end_ms": 398180,
+          "start_ms": 396100,
+          "end_ms": 398480,
           "en": "Can I see your return ticket?",
           "ko": "돌아가는 항공권을 볼 수 있을까요?"
         },
         {
-          "start_ms": 399520,
-          "end_ms": 401020,
+          "start_ms": 399440,
+          "end_ms": 401320,
           "en": "Where will you be staying?",
           "ko": "어디에서 묵으시나요?"
         },
         {
-          "start_ms": 402460,
-          "end_ms": 403860,
+          "start_ms": 402240,
+          "end_ms": 404160,
           "en": "What is your occupation?",
           "ko": "직업이 뭔가요?"
         },
         {
-          "start_ms": 405600,
-          "end_ms": 411520,
+          "start_ms": 405460,
+          "end_ms": 411500,
           "en": "Preparing this information before your trip will help make the process easier.",
           "ko": "여행 전에 이런 정보를 준비해 두면 절차가 더 쉬워져요."
         },
         {
-          "start_ms": 411520,
-          "end_ms": 422160,
+          "start_ms": 411500,
+          "end_ms": 422460,
           "en": "For example, if you’re staying with a friend or at a hotel, have the person or hotel’s name and address ready.",
           "ko": "예를 들어 친구 집이나 호텔에 묵는다면 그 사람이나 호텔의 이름과 주소를 준비해 두세요."
         },
         {
-          "start_ms": 423720,
-          "end_ms": 424440,
+          "start_ms": 423600,
+          "end_ms": 424740,
           "en": "I’m Alice Bryant.",
           "ko": "저는 앨리스 브라이언트였습니다."
+        }
+      ],
+      "scenes": [
+        {
+          "from": 0,
+          "to": 5
+        },
+        {
+          "from": 6,
+          "to": 11
+        },
+        {
+          "from": 12,
+          "to": 16
+        },
+        {
+          "from": 17,
+          "to": 21
+        },
+        {
+          "from": 22,
+          "to": 26
+        },
+        {
+          "from": 27,
+          "to": 33
+        },
+        {
+          "from": 34,
+          "to": 39
+        },
+        {
+          "from": 40,
+          "to": 48
+        },
+        {
+          "from": 49,
+          "to": 54
+        },
+        {
+          "from": 55,
+          "to": 64
+        },
+        {
+          "from": 65,
+          "to": 74
+        },
+        {
+          "from": 75,
+          "to": 77
         }
       ]
     },
@@ -1077,268 +1095,298 @@
       "reviewed": true,
       "sentences": [
         {
-          "start_ms": 7700,
-          "end_ms": 14800,
+          "start_ms": 7620,
+          "end_ms": 15100,
           "en": "And now, Words and Their Stories, from VOA Learning English.",
           "ko": "VOA 러닝 잉글리시의 '낱말과 그 이야기'입니다."
         },
         {
-          "start_ms": 17680,
-          "end_ms": 25680,
+          "start_ms": 17640,
+          "end_ms": 25960,
           "en": "On this program, we explore words and expressions in the English language.",
           "ko": "이 프로그램에서는 영어 낱말과 표현을 살펴봐요."
         },
         {
-          "start_ms": 26680,
-          "end_ms": 30620,
+          "start_ms": 26540,
+          "end_ms": 30920,
           "en": "We give examples that show how to use them.",
           "ko": "어떻게 쓰는지 보여 주는 예도 들고요."
         },
         {
-          "start_ms": 31020,
-          "end_ms": 34920,
+          "start_ms": 31000,
+          "end_ms": 35260,
           "en": "And sometimes we explain where they come from.",
           "ko": "가끔은 어디서 왔는지도 설명해요."
         },
         {
-          "start_ms": 36300,
-          "end_ms": 39800,
+          "start_ms": 36180,
+          "end_ms": 40100,
           "en": "Today, our expression comes from music.",
           "ko": "오늘의 표현은 음악에서 왔어요."
         },
         {
-          "start_ms": 41220,
-          "end_ms": 47000,
+          "start_ms": 41120,
+          "end_ms": 47280,
           "en": "A chord is three or more musical notes sounded at the same time.",
           "ko": "코드(chord)는 세 개 이상의 음을 동시에 내는 화음이에요."
         },
         {
-          "start_ms": 49620,
-          "end_ms": 52780,
+          "start_ms": 49520,
+          "end_ms": 53080,
           "en": "The word “strike” means to hit.",
           "ko": "'strike'라는 낱말은 친다는 뜻이에요."
         },
         {
-          "start_ms": 55620,
-          "end_ms": 62260,
+          "start_ms": 55480,
+          "end_ms": 62560,
           "en": "But when we play a note on a musical instrument, we can also say we struck a note.",
           "ko": "그런데 악기로 음 하나를 연주할 때도 음을 'strike'했다고 말할 수 있어요."
         },
         {
-          "start_ms": 64140,
-          "end_ms": 69760,
+          "start_ms": 64040,
+          "end_ms": 70060,
           "en": "So, our expression for today is to strike a chord.",
           "ko": "그래서 오늘의 표현은 'strike a chord'예요."
         },
         {
-          "start_ms": 70460,
-          "end_ms": 78860,
+          "start_ms": 70280,
+          "end_ms": 79160,
           "en": "In its most general definition, to strike a chord means something relates to you somehow.",
           "ko": "가장 넓은 뜻으로 'strike a chord'는 무언가가 어떤 식으로든 나와 연결된다는 뜻이에요."
         },
         {
-          "start_ms": 80260,
-          "end_ms": 82440,
+          "start_ms": 80160,
+          "end_ms": 82740,
           "en": "It resonates with you.",
           "ko": "마음에 와닿는다는 거죠."
         },
         {
-          "start_ms": 83820,
-          "end_ms": 92440,
+          "start_ms": 83740,
+          "end_ms": 92740,
           "en": "If something strikes a chord with you, it is familiar to you in some way, for better or for worse.",
           "ko": "무언가가 'strike a chord with you' 한다면, 좋든 나쁘든 어떤 면에서 익숙하게 느껴진다는 뜻이에요."
         },
         {
-          "start_ms": 93800,
-          "end_ms": 96700,
+          "start_ms": 93700,
+          "end_ms": 96980,
           "en": "Something can strike a positive chord.",
           "ko": "어떤 것은 좋은 쪽으로 마음을 울릴 수 있어요."
         },
         {
-          "start_ms": 97920,
-          "end_ms": 100160,
+          "start_ms": 97540,
+          "end_ms": 100360,
           "en": "It is familiar to you in a good way.",
           "ko": "좋은 방식으로 익숙하게 느껴지는 거예요."
         },
         {
           "start_ms": 101080,
-          "end_ms": 103540,
+          "end_ms": 103840,
           "en": "It creates good feelings or thoughts.",
           "ko": "좋은 감정이나 생각을 불러일으키죠."
         },
         {
-          "start_ms": 105300,
-          "end_ms": 110280,
+          "start_ms": 105200,
+          "end_ms": 110600,
           "en": "For example, a love song struck a deep chord with James.",
           "ko": "예를 들어, 어떤 사랑 노래가 제임스의 마음을 깊이 울렸어요."
         },
         {
-          "start_ms": 111940,
-          "end_ms": 115300,
+          "start_ms": 111900,
+          "end_ms": 115600,
           "en": "It is the song he sang to his wife at their wedding.",
           "ko": "결혼식 날 아내에게 불러 준 노래거든요."
         },
         {
-          "start_ms": 116140,
+          "start_ms": 116440,
           "end_ms": 121080,
           "en": "Or maybe the song was playing on the radio when she left him.",
           "ko": "아니면 아내가 그를 떠날 때 라디오에서 그 노래가 나오고 있었을지도 모르죠."
         },
         {
-          "start_ms": 122280,
-          "end_ms": 127300,
+          "start_ms": 121080,
+          "end_ms": 127620,
           "en": "In that case, the song would strike a negative chord with James.",
           "ko": "그렇다면 그 노래는 제임스의 마음을 아프게 울릴 거예요."
         },
         {
-          "start_ms": 129040,
-          "end_ms": 141940,
+          "start_ms": 129060,
+          "end_ms": 142280,
           "en": "As you can see from those examples, you can add other words to describe what type of chord is being struck – a deep chord, a negative chord.",
           "ko": "이 예에서 보듯이 다른 낱말을 더해서 어떤 울림인지 나타낼 수 있어요. 깊은 울림, 부정적인 울림처럼요."
         },
         {
-          "start_ms": 142940,
-          "end_ms": 145140,
+          "start_ms": 142920,
+          "end_ms": 145000,
           "en": "Here are some other examples.",
           "ko": "다른 예도 들어 볼게요."
         },
         {
-          "start_ms": 146720,
-          "end_ms": 151900,
+          "start_ms": 145000,
+          "end_ms": 152200,
           "en": "A teacher’s advice can strike a responsive chord with students.",
           "ko": "선생님의 조언이 학생들의 마음에 와닿을 수 있어요."
         },
         {
-          "start_ms": 153080,
-          "end_ms": 159120,
+          "start_ms": 152960,
+          "end_ms": 159500,
           "en": "And a politician’s speech can strike a sympathetic chord with voters.",
           "ko": "정치인의 연설이 유권자들의 공감을 살 수도 있고요."
         },
         {
-          "start_ms": 160220,
-          "end_ms": 167600,
+          "start_ms": 160380,
+          "end_ms": 167920,
           "en": "Those two words – sympathetic and responsive – are commonly used with this expression.",
           "ko": "sympathetic(공감하는)과 responsive(호응하는), 이 두 낱말은 이 표현과 자주 함께 써요."
         },
         {
-          "start_ms": 169300,
-          "end_ms": 173940,
+          "start_ms": 169220,
+          "end_ms": 174240,
           "en": "You might hear people say something “struck a familiar chord.”",
           "ko": "사람들이 무언가가 'struck a familiar chord'라고 말하는 걸 들을 수도 있어요."
         },
         {
-          "start_ms": 175160,
-          "end_ms": 178340,
+          "start_ms": 175060,
+          "end_ms": 178700,
           "en": "But to me, this sounds a bit unnecessary.",
           "ko": "그런데 제 귀에는 좀 불필요하게 들려요."
         },
         {
-          "start_ms": 179720,
-          "end_ms": 184460,
+          "start_ms": 179660,
+          "end_ms": 184760,
           "en": "If something strikes a chord, it means it is familiar in some way.",
           "ko": "'strike a chord' 자체가 어떤 면에서 익숙하다는 뜻이니까요."
         },
         {
-          "start_ms": 185260,
-          "end_ms": 189500,
+          "start_ms": 185180,
+          "end_ms": 189820,
           "en": "So, we don’t need to add the word “familiar” to the expression.",
           "ko": "그래서 이 표현에 'familiar'를 덧붙일 필요가 없어요."
         },
         {
-          "start_ms": 190480,
-          "end_ms": 192940,
+          "start_ms": 190380,
+          "end_ms": 193240,
           "en": "But I have heard it used that way before.",
           "ko": "그래도 그렇게 쓰는 걸 들어 본 적은 있어요."
         },
         {
-          "start_ms": 193940,
-          "end_ms": 197500,
+          "start_ms": 193820,
+          "end_ms": 197800,
           "en": "Maybe it means something is really familiar.",
           "ko": "아마 정말 익숙하다는 뜻이겠죠."
         },
         {
-          "start_ms": 199240,
-          "end_ms": 209760,
+          "start_ms": 199480,
+          "end_ms": 210040,
           "en": "Sometimes we use to strike a chord this way: If something creates strong feelings or thoughts, it strikes a chord.",
           "ko": "가끔은 이렇게도 써요. 무언가가 강한 감정이나 생각을 불러일으키면 'strike a chord' 한다고요."
         },
         {
-          "start_ms": 210740,
-          "end_ms": 215560,
+          "start_ms": 210680,
+          "end_ms": 215840,
           "en": "And that “something” could be unfamiliar to the person.",
           "ko": "그 '무언가'는 그 사람에게 낯선 것일 수도 있어요."
         },
         {
-          "start_ms": 216960,
-          "end_ms": 226860,
+          "start_ms": 216880,
+          "end_ms": 227140,
           "en": "Here is another situation where we use this expression: If something strikes a chord with you, you approve of it.",
           "ko": "이 표현을 쓰는 상황이 하나 더 있어요. 무언가가 'strike a chord with you' 한다면 그걸 좋게 본다는 뜻이에요."
         },
         {
-          "start_ms": 227580,
-          "end_ms": 228980,
+          "start_ms": 227460,
+          "end_ms": 229260,
           "en": "You agree with it.",
           "ko": "그것에 동의하는 거죠."
         },
         {
-          "start_ms": 230040,
-          "end_ms": 242880,
+          "start_ms": 229920,
+          "end_ms": 243140,
           "en": "For example, during the election the politician’s position on the economy and jobs must have struck a chord with voters because she won easily.",
           "ko": "예를 들어 선거 때 그 정치인이 경제와 일자리에 대해 낸 생각이 유권자들의 마음을 움직였나 봐요. 쉽게 당선됐거든요."
         },
         {
-          "start_ms": 244320,
-          "end_ms": 247940,
+          "start_ms": 244200,
+          "end_ms": 248240,
           "en": "Let’s talk for a minute about sentence structure.",
           "ko": "잠깐 문장 구조 이야기를 해 볼게요."
         },
         {
-          "start_ms": 248860,
-          "end_ms": 261120,
+          "start_ms": 248820,
+          "end_ms": 261420,
           "en": "If you look back at our examples, most if not all of them use the word “with\" – with James, with students, with voters.",
           "ko": "앞의 예를 다시 보면 거의 다 'with'를 써요. with James, with students, with voters처럼요."
         },
         {
-          "start_ms": 262220,
-          "end_ms": 267200,
+          "start_ms": 262140,
+          "end_ms": 267500,
           "en": "But you can use this expression without the word “with.”",
           "ko": "하지만 'with' 없이도 이 표현을 쓸 수 있어요."
         },
         {
-          "start_ms": 268180,
-          "end_ms": 275840,
+          "start_ms": 268080,
+          "end_ms": 276120,
           "en": "In this way, “strike a chord” means it caused a strong emotional reaction to something.",
           "ko": "이렇게 쓰면 'strike a chord'는 무언가에 강한 감정 반응을 일으켰다는 뜻이에요."
         },
         {
-          "start_ms": 276840,
-          "end_ms": 281400,
+          "start_ms": 276500,
+          "end_ms": 281700,
           "en": "For example, that movie must have really struck a chord.",
           "ko": "예를 들어 그 영화는 정말 사람들의 마음을 울렸나 봐요."
         },
         {
-          "start_ms": 282220,
-          "end_ms": 285200,
+          "start_ms": 282140,
+          "end_ms": 285500,
           "en": "Everyone came out of the theater crying.",
           "ko": "모두 울면서 극장을 나왔거든요."
         },
         {
-          "start_ms": 286680,
-          "end_ms": 293740,
+          "start_ms": 286560,
+          "end_ms": 294040,
           "en": "Hopefully learning English continues to strike a chord with all of you … a positive one!",
           "ko": "영어 공부도 여러분 모두의 마음을 계속 울리길 바라요... 좋은 쪽으로요!"
         },
         {
-          "start_ms": 295240,
-          "end_ms": 297580,
+          "start_ms": 295100,
+          "end_ms": 297820,
           "en": "And that’s the end of this Words and Their Stories.",
           "ko": "'낱말과 그 이야기'는 여기까지예요."
         },
         {
-          "start_ms": 298300,
-          "end_ms": 300100,
+          "start_ms": 298180,
+          "end_ms": 301000,
           "en": "Until next time … I’m Anna Matteo.",
           "ko": "다음 시간까지... 저는 애나 마테오였습니다."
+        }
+      ],
+      "scenes": [
+        {
+          "from": 0,
+          "to": 6
+        },
+        {
+          "from": 7,
+          "to": 14
+        },
+        {
+          "from": 15,
+          "to": 18
+        },
+        {
+          "from": 19,
+          "to": 23
+        },
+        {
+          "from": 24,
+          "to": 29
+        },
+        {
+          "from": 30,
+          "to": 34
+        },
+        {
+          "from": 35,
+          "to": 43
         }
       ]
     }

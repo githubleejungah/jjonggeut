@@ -66,8 +66,8 @@ for js in js_files:
 try:
     text = json.loads((SITE / "i18n" / "ko.json").read_text(encoding="utf-8"))
     check("화면 문구 JSON", True)
-    app = (SITE / "js" / "app.js").read_text(encoding="utf-8")
-    used = set(re.findall(r'\bt\("([a-z0-9_.]+)"', app))
+    code = "".join(js.read_text(encoding="utf-8") for js in js_files)   # 모든 화면 파일에서 쓰는 문구 키
+    used = set(re.findall(r'\bt\("([a-z0-9_.]+)"', code))
     missing = sorted(k for k in used if k not in text)
     check("화면 문구 키", not missing, ", ".join(missing))
 except json.JSONDecodeError as e:

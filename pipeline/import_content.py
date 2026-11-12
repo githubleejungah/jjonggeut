@@ -22,6 +22,7 @@ REPORTS = ROOT / "pipeline" / "reports"
 DATA = ROOT / "site" / "data" / "contents.json"
 sys.path.insert(0, str(ROOT / "pipeline"))
 from validate import validate  # noqa: E402
+from scenes import split_scenes  # noqa: E402
 
 
 def build(name: str, today: str) -> dict:
@@ -31,7 +32,12 @@ def build(name: str, today: str) -> dict:
     if len(sents) != len(ko):
         raise ValueError(f"{name}: 영어 문장 {len(sents)}개와 번역 {len(ko)}개의 수가 다릅니다")
     sentences = []
+    # 듣기에서 뺄 화자 (예: 면접 편의 로봇 해설자 'Professor Bot'. 기계음이고 대화에 끼지 않는다. 2026-11-12)
+    # 빠진 구간은 장면 사이로 가서 재생할 때 건너뛴다. 해설 내용은 표현 익히기에서 다룬다.
+    skip = set(meta.get("exclude_speakers", []))
     for s, k in zip(sents, ko):
+        if s.get("speaker") in skip:
+            continue
         item = {"start_ms": s["start_ms"], "end_ms": s["end_ms"], "en": s["en"], "ko": k}
         if s.get("speaker"):
             item = {"start_ms": s["start_ms"], "end_ms": s["end_ms"], "speaker": s["speaker"], "en": s["en"], "ko": k}
@@ -41,6 +47,7 @@ def build(name: str, today: str) -> dict:
         "topics": meta["topics"], "license_id": meta["license_id"], "source_url": meta["source_url"],
         "audio": {"src": aligned["audio"], "duration_ms": aligned["duration_ms"]},
         "added_at": today, "reviewed": True, "sentences": sentences,
+        "scenes": split_scenes(sentences, meta["level"]),
     }
 
 

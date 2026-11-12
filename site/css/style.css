@@ -236,6 +236,105 @@ h3 { font-size: 1.05rem; margin: 0 0 8px; }
 
 .interest-line { display: flex; gap: 8px; align-items: baseline; margin: -8px 0 16px; color: var(--muted); font-size: 0.95rem; }
 
+/* ---------- 콘텐츠 고르기 ---------- */
+.content-list { display: grid; gap: 10px; margin: 12px 0; }
+.content-card {
+  display: grid; gap: 2px; padding: 14px 16px; border-radius: var(--radius);
+  background: var(--surface); box-shadow: var(--shadow-1); color: var(--text); text-decoration: none;
+}
+.content-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 0.85rem; color: var(--muted); }
+.level-badge {
+  display: inline-block; min-width: 2.4em; text-align: center; padding: 0 6px; border-radius: 6px;
+  background: var(--accent); color: #fff; font-weight: 700; font-size: 0.82rem;
+}
+@media (prefers-color-scheme: dark) { .level-badge { color: #1b1716; } }
+.match-tag { display: inline-flex; align-items: center; gap: 2px; color: var(--accent-ink); font-weight: 600; }
+.match-tag .icon { width: 0.95em; height: 0.95em; stroke-width: 3; }
+.content-title { font-size: 1.1rem; }
+.content-en { color: var(--muted); font-size: 0.9rem; }
+.content-foot { color: var(--muted); font-size: 0.85rem; }
+.attribution { margin-top: 16px; }
+
+/* ---------- 오늘의 루프 ---------- */
+.loop-title { margin: 0 0 10px; font-weight: 700; }
+.stepper { list-style: none; padding: 0; margin: 0 0 12px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 4px; }
+.stepper a { display: grid; justify-items: center; gap: 2px; text-decoration: none; color: var(--muted); font-size: 0.72rem; text-align: center; }
+.step-num {
+  width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center;
+  border: 2px solid var(--border); background: var(--surface); font-weight: 700; color: var(--muted);
+}
+.step-num .icon { width: 16px; height: 16px; stroke-width: 3; }
+.stepper li.done .step-num { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent-ink); }
+.stepper li.now .step-num { border-color: var(--accent); color: var(--accent-ink); }
+.stepper li.now a { color: var(--text); font-weight: 700; }
+.loop-panel h2 { margin-bottom: 4px; }
+.btn.big { width: 100%; min-height: 56px; font-size: 1.1rem; margin: 8px 0; }
+.progress-bar { height: 8px; border-radius: 99px; background: var(--ring-track); overflow: hidden; }
+.progress-bar span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.25s linear; }
+.rate-row { display: flex; align-items: center; gap: 6px; margin: 10px 0; }
+.rate-row { color: var(--muted); }
+.rate-select {
+  min-height: 36px; padding: 4px 28px 4px 10px; border-radius: 999px; font: inherit; font-size: 0.9rem; font-weight: 600;
+  border: 1.5px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer;
+}
+.chip.small { min-height: 36px; padding: 4px 12px; font-size: 0.9rem; }
+.chip[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); color: var(--accent-ink); font-weight: 700; }
+.gist-input {
+  width: 100%; font: inherit; padding: 10px 12px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--surface); color: var(--text); resize: vertical;
+}
+.gist-check { margin-top: 14px; padding: 12px; border-radius: 12px; background: var(--bg); }
+.gist-check p { margin: 0 0 6px; }
+.sent-list { list-style: none; padding: 0; margin: 10px 0; display: grid; gap: 6px; }
+.sent { display: flex; gap: 6px; align-items: flex-start; border-radius: 12px; }
+.sent-play {
+  flex: 1; text-align: left; display: grid; gap: 1px; padding: 8px 10px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--surface); color: var(--text); font: inherit; cursor: pointer;
+}
+.speaker { font-size: 0.78rem; color: var(--accent-ink); font-weight: 700; }
+.sent-en { font-size: 1rem; }
+.sent-ko { font-size: 0.9rem; color: var(--muted); }
+.sent.reading .sent-play {
+  outline: 2px solid var(--accent);
+  background-image: linear-gradient(transparent 70%, var(--accent-soft) 70%);
+}
+.rec-tools { display: grid; gap: 4px; }
+.icon-btn {
+  width: 40px; height: 40px; border-radius: 10px; display: grid; place-items: center; cursor: pointer;
+  border: 1px solid var(--border); background: var(--surface); color: var(--accent-ink);
+}
+.icon-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+.icon-btn[data-on] { background: var(--accent); color: #fff; border-color: transparent; }
+.gap-note { min-height: 1.5em; margin: 4px 0; color: var(--accent-ink); font-weight: 700; text-align: center; }
+/* 장면 고르기 */
+.scene-label { margin: -6px 0 6px; }
+.scene-row { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 8px; margin-bottom: 4px; }
+.scene-chip {
+  flex: none; display: inline-flex; align-items: center; gap: 2px; min-width: 40px; height: 36px; padding: 0 10px;
+  justify-content: center; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--muted); text-decoration: none; font-weight: 700; font-size: 0.9rem;
+}
+.scene-chip .icon { width: 14px; height: 14px; stroke-width: 3; }
+.scene-chip.done { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent-ink); }
+.scene-chip.now { border-color: var(--accent); color: var(--accent-ink); }
+
+/* 화면 아래에 붙는 재생 막대: 대본이 길어도 스크롤 없이 누른다 (2026-11-12 사용자 의견) */
+.player-bar {
+  position: sticky; bottom: 0; z-index: 5;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px;
+  margin: 12px -16px -16px; padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: var(--surface); border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius) var(--radius); box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.06);
+}
+.player-bar .rate-row { margin: 0; }
+.player-bar .gap-note { width: 100%; margin: 0; min-height: 0; }
+.player-bar .gap-note:empty { display: none; }
+
+.goal-line { display: flex; align-items: center; gap: 4px; margin: 4px 0 0; color: var(--accent-ink); font-weight: 700; font-size: 0.92rem; }
+.goal-line .icon { stroke-width: 3; }
+.bounce { animation: bounce 0.9s ease 2; }
+@keyframes bounce { 0%, 100% { transform: translateY(0); } 40% { transform: translateY(-14px) scale(1.04); } }
+
 /* ---------- 9) 앱 안 브라우저 안내 ---------- */
 .inapp-notice {
   background: var(--accent-soft); color: var(--accent-ink); border-radius: var(--radius);
