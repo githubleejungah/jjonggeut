@@ -13,16 +13,14 @@ test("간식 흐름: 간식 → 통통 → 고르기 → 운동이면 원래 몸
   assert.equal(r.state.stage, "snack");                                            // 처음부터 다시
 });
 
-test("간식 더: 더 통통해지고, 가장 통통하면 더 늘지 않는다", () => {
+test("간식 더: 더 통통 → 가장 통통(배 꽉) → 또 간식이면 배탈 → 다음엔 운동만 하고 원래 몸", () => {
   let s = { ...Rabbit.START, chub: 1, stage: "choose" };
-  for (const want of [2, 3, 3]) {
-    s = Rabbit.choose(s, "food");
-    const r = Rabbit.step(s);
-    assert.equal(r.state.chub, want);
-    assert.equal(r.event, want === 3 && r.from === 3 ? "full" : "feast");
-    assert.equal(r.state.stage, "choose");
-    s = r.state;
-  }
+  let r = Rabbit.step(Rabbit.choose(s, "food")); assert.equal(r.event, "feast"); assert.equal(r.state.chub, 2);
+  r = Rabbit.step(Rabbit.choose(r.state, "food")); assert.equal(r.event, "full"); assert.equal(r.state.chub, 3);
+  r = Rabbit.step(Rabbit.choose(r.state, "food")); assert.equal(r.event, "sick"); assert.equal(r.state.stage, "sick");
+  s = Rabbit.choose(r.state, "food");                                              // 아플 때는 고를 수 없다
+  assert.equal(s.pending, null);
+  r = Rabbit.step(s); assert.equal(r.event, "recover"); assert.equal(r.state.chub, 0); assert.equal(r.state.stage, "snack");
 });
 
 test("기념일: 양력·음력 공휴일과 계절", () => {
@@ -31,7 +29,7 @@ test("기념일: 양력·음력 공휴일과 계절", () => {
   assert.equal(Rabbit.occasion("2027-09-14").id, "chuseok");
   assert.equal(Rabbit.occasion("2026-05-24").id, "buddha");
   assert.equal(Rabbit.occasion("2026-07-17").wear, "flag");                       // 제헌절 (2026년부터 공휴일)
-  assert.equal(Rabbit.occasion("2026-05-01").id, "labor");                        // 노동절 (2026년부터 공휴일)
+  assert.equal(Rabbit.occasion("2026-05-01").id, "labor");                        // 근로자의 날 (2026년부터 공휴일)
   const memorial = Rabbit.occasion("2026-06-06");
   assert.equal(memorial.solemn, true);
   assert.equal(memorial.confetti, null);                                          // 현충일은 꽃가루 없음
@@ -42,7 +40,7 @@ test("기념일: 양력·음력 공휴일과 계절", () => {
 test("모든 차림이 그려진다 (빈 그림·NaN 없음)", () => {
   for (const id of Rabbit.ALL_OCCASIONS) {
     for (const chub of [0, 3]) {
-      const s = Rabbit.svg({ chub, wear: Rabbit.wearOf(id), snack: 1, workout: true });
+      const s = Rabbit.svg({ chub, wear: Rabbit.wearOf(id), snack: 1, workout: true }) + Rabbit.svg({ chub, sick: true });
       assert.ok(s.startsWith("<svg") && s.endsWith("</svg>"), id);
       assert.ok(!s.includes("NaN") && !s.includes("undefined"), id);
     }

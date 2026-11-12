@@ -152,7 +152,9 @@ def match(words: list[dict], sentences: list[dict]) -> list[dict]:
 
 
 PAD_BEFORE_MS = 120
-PAD_AFTER_MS = 300
+PAD_AFTER_MS = 300       # 끝 여유 기본
+PAD_AFTER_MAX_MS = 600   # 다음 문장까지 빈틈이 넉넉하면 여기까지 (2026-11-12: 마지막 문장 'Bryant'의 끝소리가 잘렸다)
+GAP_KEEP_MS = 150        # 다음 문장 시작 앞에 남겨 둘 틈
 SHORT_MS = 300
 
 
@@ -160,7 +162,7 @@ def pad(sents: list[dict], duration_ms: int) -> None:
     """문장 앞뒤에 여유를 준다 (2026-11-12, 구간을 다시 받아써 보니 끝이 잘린 문장이 있었다).
     받아쓰기 모델은 단어 끝을 실제보다 조금 일찍 잡는다. 그래서
       시작은 0.12초 앞당기고(앞 문장 끝보다 앞으로는 가지 않음),
-      끝은 0.3초 늦춘다(다음 문장 시작을 넘지 않음).
+      끝은 0.3초 늦춘다(다음 문장 시작을 넘지 않음). 빈틈이 넉넉하면 0.6초까지(다음 말 0.15초 앞까지).
     0.3초보다 짧게 잡힌 문장("Congratulations!"가 길이 0으로 잡힘)은 앞뒤 빈틈 전체를 쓴다."""
     orig = [(s["start_ms"], s["end_ms"]) for s in sents]
     for k, s in enumerate(sents):
@@ -171,7 +173,8 @@ def pad(sents: list[dict], duration_ms: int) -> None:
             s["start_ms"], s["end_ms"] = max(prev_end, start - 600), next_start
         else:
             s["start_ms"] = max(prev_end, start - PAD_BEFORE_MS)
-            s["end_ms"] = min(next_start, end + PAD_AFTER_MS)
+            room = next_start - end - GAP_KEEP_MS          # 다음 말 앞까지 쓸 수 있는 빈틈
+            s["end_ms"] = min(next_start, end + max(PAD_AFTER_MS, min(PAD_AFTER_MAX_MS, room)))
     # 여유끼리 겹치면 앞 문장의 늘린 끝을 줄인다 (원래 구간은 건드리지 않는다)
     for k in range(1, len(sents)):
         if sents[k]["start_ms"] < sents[k - 1]["end_ms"]:

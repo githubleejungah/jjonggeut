@@ -234,7 +234,7 @@ function soundTips() {
 }
 
 /* ---------- 처음 시작 화면: ① 소리 확인 → ② 관심사 고르기 ---------- */
-function renderWelcome(step = 1) {
+function renderWelcome(step = 1, again = false) {
   renderTopbar(true);
   if (step === 1) {
     const tips = h("div", { hidden: true }, soundTips());
@@ -244,7 +244,7 @@ function renderWelcome(step = 1) {
     speech.onSentence = (p) => lines.forEach((el) => el.classList.toggle("reading", el.dataset.sec === p.sec));
     speech.listeners.add(() => { if (speech.status === "idle") lines.forEach((el) => el.classList.remove("reading")); });
     app.replaceChildren(
-      h("p", { class: "step-label" }, t("welcome.step", { n: 1, total: 2 })),
+      !again && h("p", { class: "step-label" }, t("welcome.step", { n: 1, total: 2 })),
       h("section", { class: "card welcome" },
         h("img", { src: "img/rabbit.svg", alt: "", class: "rabbit-big" }),
         h("h2", {}, t("welcome.sound.title")),
@@ -252,8 +252,10 @@ function renderWelcome(step = 1) {
         h("div", { class: "story" }, lines),
         speech.supported ? soundTestButton(RABBIT_STORY, "welcome.story.play") : h("p", { class: "warn-line" }, t("about.voice.unsupported")),
         themePicker()),
-      h("button", { class: "btn primary wide", type: "button", onclick: () => renderWelcome(2) },
-        ...withIcon("arrow", t("welcome.sound.ok"))),
+      again
+        ? h("a", { class: "btn primary wide", href: "#/about" }, t("story.done"))
+        : h("button", { class: "btn primary wide", type: "button", onclick: () => renderWelcome(2) },
+          ...withIcon("arrow", t("welcome.sound.ok"))),
       h("button", { class: "btn wide", type: "button", onclick: () => { tips.hidden = false; } }, t("welcome.sound.no")),
       tips);
     return;
@@ -339,7 +341,8 @@ const rabbitState = () => ({ ...Rabbit.START, ...(Review.getSettings().rabbit ??
 // 홈의 토끼 카드: 지금 살찐 정도 + 오늘의 차림. 공휴일이면 그날의 영어 한 줄을 들려준다
 function rabbitCard() {
   const occ = todayOccasion();
-  const art = Rabbit.el({ chub: rabbitState().chub, wear: occ?.wear, label: t("rabbit.alt") }, "rabbit-art");
+  const st = rabbitState();
+  const art = Rabbit.el({ chub: st.chub, wear: occ?.wear, sick: st.stage === "sick", label: t("rabbit.alt") }, "rabbit-art");
   return h("section", { class: "rabbit-card" },
     art,
     h("div", { class: "rabbit-text" },
@@ -363,7 +366,12 @@ function renderRabbits() {
     h("div", { class: "rabbit-grid" },
       tile({ chub: 0 }, t("rabbits.chub.0")), tile({ chub: 0, snack: 0 }, t("rabbits.snack")),
       tile({ chub: 1, snack: 1 }, t("rabbits.chub.1")), tile({ chub: 2 }, t("rabbits.chub.2")),
-      tile({ chub: 3 }, t("rabbits.chub.3")), tile({ chub: 2, workout: true }, t("rabbits.workout"))),
+      tile({ chub: 3 }, t("rabbits.chub.3")), tile({ chub: 3, sick: true }, t("rabbits.sick")),
+      tile({ chub: 2, workout: true }, t("rabbits.workout"))),
+    h("h3", {}, t("rabbits.chubby.holidays")),
+    h("div", { class: "rabbit-grid" }, [["flag", "samil", 3], ["christmas", "christmas", 3], ["seollal", "seollal", 2],
+      ["chuseok", "chuseok", 3], ["children", "children", 2], ["winter", "winter", 3]].map(([wear, id, chub]) =>
+      tile({ wear, chub }, t(`occ.${id}.name`)))),
     h("h3", {}, t("rabbits.seasons")),
     h("div", { class: "rabbit-grid" }, ["spring", "summer", "autumn", "winter"].map((id) =>
       tile({ wear: id }, t(`occ.${id}.name`)))),
@@ -375,6 +383,9 @@ function renderRabbits() {
 }
 
 /* ---------- 화면 2: 내 기록 ---------- */
+// 카드의 뜻: 카드에는 표현 번호만 담고, 뜻은 콘텐츠 데이터에서 찾는다(데이터가 고쳐지면 뜻도 따라 고쳐진다)
+const cardMeaning = (card) => state.contents.find((x) => x.id === card.content_id)?.expressions?.[card.expr]?.meaning_ko ?? "";
+
 // 내 기록 (2026-11-12): 저장된 기록으로만 그린다 (화면 값이 아니라 저장소가 기준)
 let progressMonth = null;   // 달력에 보이는 달 "YYYY-MM"
 function renderProgress() {
@@ -425,6 +436,9 @@ function renderProgress() {
     .filter((x) => x.rec.gist?.trim())
     .sort((a, b) => b.rec.updated_at.localeCompare(a.rec.updated_at)).slice(0, 5);
   const recentCards = [...cards].reverse().slice(0, 10);
+  const retells = touched.flatMap((c) => c.scenes.map((_, k) => ({ c, k, rec: Review.getLoop(sceneKey(c, k)) })))
+    .filter((x) => x.rec.retell_text?.trim())
+    .sort((a, b) => b.rec.updated_at.localeCompare(a.rec.updated_at)).slice(0, 5);
 
   app.replaceChildren(...[
     h("h2", {}, t("progress.title")),
@@ -442,9 +456,14 @@ function renderProgress() {
       gists.map((g) => h("div", { class: "gist-line" },
         h("p", {}, g.rec.gist),
         h("p", { class: "muted small" }, t("progress.gist.where", { title: g.c.title_ko, k: g.k + 1, date: g.rec.updated_at }))))),
+    retells.length > 0 && h("section", { class: "card" }, h("h3", {}, t("progress.retells")),
+      retells.map((g) => h("div", { class: "gist-line" },
+        h("p", { lang: "en" }, g.rec.retell_text),
+        h("p", { class: "muted small" }, t("progress.gist.where", { title: g.c.title_ko, k: g.k + 1, date: g.rec.updated_at }))))),
     recentCards.length > 0 && h("section", { class: "card" }, h("h3", {}, t("progress.recent.cards")),
       h("ul", { class: "card-list" }, recentCards.map((c) => h("li", {},
         h("b", { lang: "en" }, c.text),
+        cardMeaning(c) && h("span", { class: "small" }, t("progress.meaning"), " ", cardMeaning(c)),
         c.mine && h("span", { class: "muted small" }, t("progress.mine"), " ", h("span", { lang: "en" }, c.mine)))))),
     h("p", { class: "muted small" }, t("progress.recording")),
   ].filter(Boolean));
@@ -480,6 +499,7 @@ function renderAbout() {
           onchange: (ev) => Review.setSettings({ seasonal: ev.currentTarget.checked }) }),
         " ", t("about.seasonal.desc")),
       h("a", { href: "#/rabbits" }, t("rabbits.title"))),
+    h("nav", { class: "link-list" }, linkRow("#/story", "speaker", t("story.again"), t("story.again.desc"))),
     h("nav", { class: "link-list" },
       linkRow("#/interests", "plus", t("interest.title"),
         interests.length ? interestNames(interests) : t("interest.none"))),
@@ -531,6 +551,7 @@ function route() {
   else if (hash === "#/about") renderAbout();
   else if (hash === "#/progress") renderProgress();
   else if (hash === "#/rabbits") renderRabbits();
+  else if (hash === "#/story") renderWelcome(1, true);
   else if (hash === "#/interests") renderInterests();
   else if (page === "library") renderLibrary();
   else if (page === "loop") renderLoop(decodeURIComponent(id ?? ""), scene, step);
@@ -556,7 +577,7 @@ function inAppNotice() {
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
 const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url} ${r.status}`); return r.json(); });
-Promise.all([getJSON("i18n/ko.json?v=2026111220"), getJSON("data/contents.json?v=2026111219")])
+Promise.all([getJSON("i18n/ko.json?v=2026111222"), getJSON("data/contents.json?v=2026111222")])
   .then(([text, data]) => {
     state.text = text;
     state.contents = data.contents ?? [];

@@ -467,3 +467,10 @@ details.series > summary:focus-visible { outline: 2px solid var(--accent); outli
 .rabbit-tile figcaption { font-size: 0.82rem; margin-top: 4px; }
 .cf.leaf { width: 10px; height: 7px; border-radius: 0 90% 0 90%; }
 .cf.star { width: 10px; height: 10px; clip-path: polygon(50% 0, 61% 38%, 100% 38%, 68% 61%, 79% 100%, 50% 76%, 21% 100%, 32% 61%, 0 38%, 39% 38%); }
+
+/* 표현 익히기·다시 말하기 (2026-11-12) */
+.expr-sent-ko { margin: 0 0 8px; }
+.retell-box { padding: 12px 14px; border-radius: 14px; background: var(--bg); border: 1px solid var(--border); margin: 10px 0; }
+.retell-box .tips { margin: 4px 0 10px; }
+.retell-write { margin: 10px 0; }
+.retell-write summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; color: var(--accent-ink); font-weight: 600; }

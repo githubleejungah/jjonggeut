@@ -10,6 +10,8 @@
   3. 기준 글은 저절로 바꾸지 않는다. 사람이 확인하고 --accept 할 때만 바꾼다 (제안 → 승인).
      --accept는 그 페이지에 연결된 라이선스의 checked_at(마지막 확인한 날)도 오늘로 고친다.
   4. 라이선스 checked_at이 180일 넘게 지났으면 보고서에 적는다.
+  5. 토끼 계절·공휴일 날짜표(site/js/rabbit.js의 LUNAR: 설·추석·부처님오신날)가 내후년까지 없으면 적는다.
+     설날은 1월 말일 수도 있어서 한 해 앞서 더해야 한다.
 
 이 도구는 법률 판단을 하지 않는다. 바뀐 곳을 찾아 사람에게 보여 줄 뿐이다.
 표준 라이브러리만 쓴다. 종료 코드: 0 바뀐 것 없음, 1 바뀜·확인 필요, 2 페이지를 못 받음.
@@ -32,6 +34,7 @@ SNAP = ROOT / "pipeline" / "terms"
 REPORTS = ROOT / "pipeline" / "reports"
 CONTENTS = ROOT / "site" / "data" / "contents.json"
 STALE_DAYS = 180
+RABBIT_JS = ROOT / "site" / "js" / "rabbit.js"
 UA = "Mozilla/5.0 (compatible; terms-watch)"
 
 
@@ -76,6 +79,20 @@ def stale_licenses(today: dt.date) -> list[str]:
         if (today - checked).days > STALE_DAYS:
             out.append(f"- `{lic['id']}`: 마지막 확인 {lic['checked_at']} ({(today - checked).days}일 전). 조건 페이지를 사람이 다시 읽어 주세요.")
     return out
+
+
+def holiday_table(today: dt.date) -> list[str]:
+    """음력 공휴일 날짜표가 내후년(today.year + 2)까지 있는지 본다. 없으면 보고서에 적을 줄을 돌려준다."""
+    try:
+        text = RABBIT_JS.read_text(encoding="utf-8")
+    except OSError:
+        return [f"- 공휴일 날짜표: {RABBIT_JS.relative_to(ROOT)}을 읽지 못함"]
+    years = [int(y) for y in re.findall(r"^\s+(\d{4}): \{ seollal:", text, re.M)]
+    last = max(years, default=0)
+    if last >= today.year + 2:
+        return []
+    return [f"- 공휴일 날짜표: 설·추석·부처님오신날 날짜가 {last}년까지만 있다. {last + 1}년 날짜를 "
+            f"한국천문연구원 월력요항(공휴일)에서 확인해 `site/js/rabbit.js`의 LUNAR에 더하고 시험(tests/rabbit.test.js)을 돌린다."]
 
 
 def check(sources: list[dict], today: dt.date) -> tuple[int, list[str]]:
@@ -141,6 +158,7 @@ def main(argv: list[str]) -> int:
         return accept(sources, argv[1], today)
     code, out = check(sources, today)
     out += stale_licenses(today)
+    out += holiday_table(today)
     if out:
         REPORTS.mkdir(parents=True, exist_ok=True)
         rep = REPORTS / f"조건변화_{today}.md"

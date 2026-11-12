@@ -35,11 +35,15 @@ const Rabbit = (() => {
   function face(g, kind) {
     const blush = kind === "calm" ? "" :
       `<ellipse cx="${-g.blushX}" cy="6" rx="6" ry="3.4" fill="${BLUSH}"/><ellipse cx="${g.blushX}" cy="6" rx="6" ry="3.4" fill="${BLUSH}"/>`;
-    const eyes = kind === "calm"
+    const eyes = kind === "sick"
+      ? `<path d="M-18 -9 L-11 -6 M-18 -5 L-11 -6 M18 -9 L11 -6 M18 -5 L11 -6" fill="none" stroke="${INK}" stroke-width="1.5" stroke-linecap="round"/>`
+      : kind === "calm"
       ? `<path d="M-18 -7 Q-14 -4 -10 -7 M10 -7 Q14 -4 18 -7" fill="none" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>`
       : `<circle cx="-14" cy="-8" r="3.5" fill="${INK}"/><circle cx="14" cy="-8" r="3.5" fill="${INK}"/>
          <circle cx="-13" cy="-9" r="1.2" fill="#FFF"/><circle cx="15" cy="-9" r="1.2" fill="#FFF"/>`;
-    const mouth = kind === "chew"
+    const mouth = kind === "sick"
+      ? `<path d="M-4 6 Q-2 4 0 6 Q2 8 4 6" fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/>`
+      : kind === "chew"
       ? `<path d="M0 1.5 L0 3.5" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="0" cy="6" rx="2.6" ry="2" fill="${INK}"/>`
       : `<path d="M0 1.5 L0 4 M-4 5.5 Q-2 8 0 4 Q2 8 4 5.5" fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/>`;
     return `${eyes}${blush}<ellipse cx="0" cy="0" rx="2.4" ry="1.6" fill="${NOSE}"/>${mouth}`;
@@ -165,14 +169,31 @@ const Rabbit = (() => {
   };
 
   // 토끼 SVG 문자열. opts: { chub, wear, face: "smile"|"chew"|"calm", snack: 번호|null, workout: bool, label }
-  function svg({ chub = 0, wear = null, face: kind = null, snack: snackNo = null, workout: work = false, label = "토끼" } = {}) {
+  function svg({ chub = 0, wear = null, face: kind = null, snack: snackNo = null, workout: work = false, sick = false, label = "토끼" } = {}) {
     const g = geom(chub);
+    if (sick) return sickSvg(g, label);
     const w = WEAR[wear] ?? {};
     const faceKind = kind ?? w.face ?? (snackNo !== null ? "chew" : "smile");
     const W = g.cheekX + g.cheekR + 30;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-W} -80 ${2 * W} 130" role="img" aria-label="${label}">`
       + (w.back?.(g) ?? "") + body(g) + face(g, faceKind) + (w.front?.(g) ?? "")
       + (work ? workout(g) : "") + (snackNo !== null ? snack(g, snackNo) : "") + "</svg>";
+  }
+
+  // 배탈 나서 누운 토끼 (정면에서 본 모습): 베개를 베고, 이마에 얼음주머니, 이불은 볼 아래까지
+  function sickSvg(g, label) {
+    const W = g.cheekX + g.cheekR + 30;
+    const bw = g.cheekX + g.cheekR + 8;
+    let stripes = "";
+    for (let x = -bw + 14; x < bw - 6; x += 16) stripes += `<path d="M${x} 26 L${x} 48" stroke="#E6EFF7" stroke-width="3"/>`;
+    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-W} -80 ${2 * W} 130" role="img" aria-label="${label}">`
+      + `<rect x="${-bw - 4}" y="-58" width="${2 * bw + 8}" height="44" rx="20" fill="#F3EEE6" stroke="#E3D6C3"/>`
+      + body(g) + face(g, "sick")
+      + `<ellipse cx="0" cy="-33" rx="15" ry="6.5" fill="#BFE0F2" stroke="#9CC0E6" stroke-width="0.8"/>`
+      + `<path d="M-6 -36 q6 -3 12 0" stroke="#E6F3FA" stroke-width="1.6" fill="none" stroke-linecap="round"/>`
+      + `<path d="M${-bw} 22 Q0 12 ${bw} 22 L${bw} 50 L${-bw} 50 Z" fill="#CFE0EE" stroke="#A9C3DA" stroke-width="0.8"/>`
+      + stripes
+      + `<path d="M${-bw} 22 Q0 12 ${bw} 22" fill="none" stroke="#FBFAF7" stroke-width="5" stroke-linecap="round"/></svg>`;
   }
 
   // 화면에 넣을 요소. 그림 높이를 정하면 살찐 만큼 가로가 넓어진다
@@ -189,25 +210,30 @@ const Rabbit = (() => {
        2번째 완료: 간식을 먹고 몸이 옆으로 통통해진다
        3번째 완료: '운동시키기 / 간식 더 주기'를 고른다
        4번째 완료: 운동 → 원래 몸으로(처음부터 다시), 간식 더 → 더 통통(그다음 완료에 다시 고르기)
-     state = { chub: 0~3, stage: "snack"|"grow"|"choose", pending: null|"exercise"|"food", snacks: 먹은 수 } */
+     가장 통통(3단계)에서 또 간식을 고르면 배탈이 나서 눕는다(sick). 다음 완료는 고르기 없이 운동만 하고 원래 몸으로.
+     (2026-11-12 사용자 제안: 단계마다 토끼 모습이 바뀌지 않는 날을 줄인다)
+     state = { chub: 0~3, stage: "snack"|"grow"|"choose"|"sick", pending: null|"exercise"|"food", snacks: 먹은 수 } */
   const START = { chub: 0, stage: "snack", pending: null, snacks: 0 };
   function step(prev) {
     const s = { ...START, ...prev };
     if (s.pending === "exercise") return { state: { ...s, chub: 0, stage: "snack", pending: null }, event: "exercise", from: s.chub };
     if (s.pending === "food") {
-      const full = s.chub >= MAX_CHUB;
-      return { state: { ...s, chub: Math.min(MAX_CHUB, s.chub + 1), stage: "choose", pending: null, snacks: s.snacks + 1 },
-        event: full ? "full" : "feast", from: s.chub };
+      if (s.chub >= MAX_CHUB) return { state: { ...s, stage: "sick", pending: null, snacks: s.snacks + 1 }, event: "sick", from: s.chub };
+      const chub = s.chub + 1;
+      return { state: { ...s, chub, stage: "choose", pending: null, snacks: s.snacks + 1 },
+        event: chub >= MAX_CHUB ? "full" : "feast", from: s.chub };
     }
+    if (s.stage === "sick") return { state: { ...s, chub: 0, stage: "snack", pending: null }, event: "recover", from: s.chub };
     if (s.stage === "snack") return { state: { ...s, stage: "grow", snacks: s.snacks + 1 }, event: "snack", from: s.chub };
     if (s.stage === "grow") return { state: { ...s, chub: Math.min(MAX_CHUB, s.chub + 1), stage: "choose", snacks: s.snacks + 1 }, event: "grow", from: s.chub };
     return { state: s, event: "choose", from: s.chub };     // 고르지 않고 지나갔으면 다시 고르게 한다
   }
-  const choose = (state, pick) => ({ ...START, ...state, pending: pick === "food" ? "food" : "exercise" });
+  const choose = (state, pick) => (state?.stage === "sick" ? { ...START, ...state }     // 아플 때는 고를 수 없다
+    : { ...START, ...state, pending: pick === "food" ? "food" : "exercise" });
 
   /* ---------- 계절과 기념일 ----------
      양력 고정 공휴일 + 음력 공휴일(설·부처님오신날·추석) 날짜표. 음력 날짜는 한국천문연구원 월력요항 기준.
-     2026년부터 노동절(5/1)·제헌절(7/17)도 공휴일 (공휴일에 관한 법률 개정, 2026).
+     2026년부터 근로자의 날(5/1, 법 이름은 노동절)·제헌절(7/17)도 공휴일 (공휴일에 관한 법률 개정, 2026).
      날짜표가 끝나는 해(2030) 전에 다음 해를 더한다. 대체공휴일은 꾸미지 않는다(그날의 의미가 없어서). */
   const LUNAR = {
     2026: { seollal: ["02-16", "02-17", "02-18"], buddha: ["05-24"], chuseok: ["09-24", "09-25", "09-26"] },

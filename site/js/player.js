@@ -10,11 +10,17 @@ const Player = (() => {
   /* ---------- 계산 (시험할 수 있는 부분) ---------- */
 
   // 따라 말할 시간: 문장 길이 × 배율 + 여유. 느리게 들었으면 따라 말하는 데도 더 걸린다.
-  const SHADOW_FACTOR = 1.1;
-  const SHADOW_EXTRA_MS = 700;
-  function shadowGap(sentence, rate = 1) {
+  // 따라 말할 시간 (2026-11-12 사용자 의견으로 늘림): 문장 길이 × 1.3 + 1.2초.
+  // 긴 문장은 기억에 담기 어려워 3초를 넘는 만큼 30%를 더 준다. scale은 사용자가 고르는 '기다리는 시간'(1·1.3·1.6)
+  const SHADOW_FACTOR = 1.3;
+  const SHADOW_EXTRA_MS = 1200;
+  const SHADOW_LONG_FROM_MS = 3000;
+  const SHADOW_LONG_FACTOR = 0.3;
+  const WAITS = { normal: 1, more: 1.3, most: 1.6 };
+  function shadowGap(sentence, rate = 1, scale = 1) {
     const len = (sentence.end_ms - sentence.start_ms) / rate;
-    return Math.round(len * SHADOW_FACTOR + SHADOW_EXTRA_MS);
+    const long = Math.max(0, len - SHADOW_LONG_FROM_MS) * SHADOW_LONG_FACTOR;
+    return Math.round((len * SHADOW_FACTOR + SHADOW_EXTRA_MS + long) * scale);
   }
 
   // 지금 재생 위치(ms)가 몇 번째 문장인지. 문장 사이 빈틈이면 바로 앞 문장을 돌려준다.
@@ -177,7 +183,7 @@ const Player = (() => {
           this.setStatus("playing");
           this.watchEnd(s.end_ms, my, null, () => {
             if (shadow) {
-              const gap = shadowGap(s, this.rate);
+              const gap = shadowGap(s, this.rate, this.gapScale ?? 1);
               this.setStatus("gap");
               this.onGap?.(i, gap);
               this.gapTimer = setTimeout(next, gap);
@@ -192,7 +198,7 @@ const Player = (() => {
     return p;
   }
 
-  return { create, shadowGap, sentenceAt, RATES };
+  return { create, shadowGap, sentenceAt, RATES, WAITS };
 })();
 
 if (typeof module !== "undefined") module.exports = Player;

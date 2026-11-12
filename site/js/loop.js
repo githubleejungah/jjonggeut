@@ -428,8 +428,6 @@ function chunkPanel(c, sc) {
       h("a", { class: "btn primary wide", href: `#/loop/${c.id}/${sc.k + 1}/shadow` }, ...withIcon("arrow", t("loop.skip"))),
     ];
   }
-  const interests = Review.getSettings().interests;
-  const topic = c.topics.find((x) => interests.includes(x)) ?? interests[0] ?? "daily";
   const box = h("div", {});
   let pos = 0;
 
@@ -448,10 +446,16 @@ function chunkPanel(c, sc) {
       h("button", { class: "chip small", type: "button", "aria-pressed": "false", onclick: (ev) => {
         guess = g;
         guessRow.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === ev.currentTarget)));
-        save.disabled = false;
+        pickHint.hidden = true;
       } }, t(`expr.guess.${g}`))));
     const last = pos === list.length - 1;
-    const save = h("button", { class: "btn primary wide", type: "button", disabled: !already, onclick: () => {
+    const pickHint = h("p", { class: "warn-line", hidden: true }, t("expr.guess.first"));
+    const save = h("button", { class: "btn primary wide", type: "button", onclick: () => {
+      if (!already && !guess) {          // 버튼을 잠가 두면 왜 안 눌리는지 알 수 없다 → 눌렀을 때 알려 준다
+        pickHint.hidden = false;
+        guessRow.scrollIntoView({ block: "center", behavior: "smooth" });
+        return;
+      }
       if (!already) Review.addCard({ id, content_id: c.id, expr: e.n, text: e.text, mine: mine.value.trim() || undefined }, guess ?? "no");
       if (last) finishStep(c, sc, "chunk");
       else { pos += 1; show(); }
@@ -460,14 +464,15 @@ function chunkPanel(c, sc) {
     // h()로 감싸야 목록(배열)과 빈 값(false)이 알맞게 처리된다 (append는 배열을 글자로 바꿔 버린다)
     reveal.append(h("div", {},
       h("p", { class: "expr-meaning" }, h("span", { class: "pen" }, e.meaning_ko)),
+      h("p", { class: "expr-sent-ko" }, h("span", { class: "muted small" }, t("expr.sent.ko")), " ", s.ko),
       h("p", { class: "expr-note" }, e.note_ko),
       e.similar?.length > 0 && h("p", { class: "muted small" }, t("expr.similar"), " ", h("span", { lang: "en" }, e.similar.join(", "))),
       h("ul", { class: "expr-examples" }, e.examples.map((x) =>
         h("li", {}, h("span", { lang: "en", class: "sent-en" }, x.en), h("span", { class: "sent-ko" }, x.ko)))),
       already
         ? h("p", { class: "goal-line" }, icon("check"), t("expr.already"))
-        : [h("p", { class: "small" }, h("b", {}, t("expr.guess.ask"))), guessRow],
-      h("p", { class: "small" }, h("b", {}, t("expr.mine")), " ", t(`expr.mine.${topic}`)),
+        : [h("p", { class: "small" }, h("b", {}, t("expr.guess.ask"))), guessRow, h("p", { class: "muted small" }, t("expr.guess.why")), pickHint],
+      h("p", { class: "small" }, h("b", {}, t("expr.mine")), " ", t("expr.mine.ask")),
       mine));
     revealBtn.onclick = () => { reveal.hidden = false; revealBtn.hidden = true; save.hidden = false; };
     save.hidden = true;
@@ -494,9 +499,21 @@ function chunkPanel(c, sc) {
 }
 
 /* 5. 따라 말하기 + 녹음 비교 (F-10) */
+// 기다리는 시간: 보통·넉넉히·아주 넉넉히. 고른 값은 저장한다
+function waitPicker(p) {
+  const saved = Review.getSettings().shadow_wait ?? "normal";
+  p.gapScale = Player.WAITS[saved] ?? 1;
+  return h("label", { class: "rate-row wait-row" }, t("loop.wait"), " ",
+    h("select", { class: "rate-select", onchange: (ev) => {
+      p.gapScale = Player.WAITS[ev.currentTarget.value] ?? 1;
+      Review.setSettings({ shadow_wait: ev.currentTarget.value });
+    } }, Object.keys(Player.WAITS).map((k) => h("option", { value: k, selected: k === saved ? "selected" : null }, t(`loop.wait.${k}`)))));
+}
+
 function shadowPanel(c, sc) {
   const p = loopView.player;
   p.listeners.clear();
+  const wait = waitPicker(p);
   const list = h("ol", { class: "sent-list" });
   const gapNote = h("p", { class: "gap-note", "aria-live": "polite" });
   p.onGap = (i, ms) => { gapNote.textContent = t("loop.shadow.gap", { s: (ms / 1000).toFixed(1) }); };
@@ -537,6 +554,7 @@ function shadowPanel(c, sc) {
   return [
     h("h2", {}, t("loop.shadow.title")),
     h("p", {}, t("loop.shadow.desc")),
+    wait,
     recWhy && h("p", { class: "warn-line small" }, t(`rec.why.${recWhy === "insecure" ? "insecure" : "unsupported"}`)),
     list,
     nextButton(c, sc, "shadow"),
@@ -544,13 +562,16 @@ function shadowPanel(c, sc) {
   ];
 }
 
-/* 6. 다시 말하기 (F-11): 관심사에 맞춘 질문 + 1분 녹음 */
+/* 6. 다시 말하기 (F-11, 2026-11-12 보강)
+   들은 장면을 내 말로 다시 말한다(출력 연습). 순서: 말 틀(시작 문장) → 이 장면 표현 → 1분 말하기 → 스스로 점검.
+   녹음은 https에서만 된다. 안 되는 곳에서는 1분 타이머만 쓰고 말로 하거나, 글로 써도 된다(쓴 글은 내 기록에 남는다). */
 const RETELL_MAX_MS = 60000;
 function retellPanel(c, sc) {
   loopView.player.stop();
-  const interests = Review.getSettings().interests;
-  const topic = c.topics.find((x) => interests.includes(x)) ?? interests[0] ?? "daily";
+  const key = sceneKey(c, sc.k);
+  const rec = Review.getLoop(key);
   const recWhy = Recorder.why();
+  const exprs = (c.expressions ?? []).filter((e) => e.scene === sc.k);
   const name = `${c.id}:retell:${sc.k}`;
   const status = h("p", { class: "info-line center", "aria-live": "polite" });
   const play = h("button", { class: "btn", type: "button", disabled: true,
@@ -578,12 +599,50 @@ function retellPanel(c, sc) {
     draw();
   };
   draw();
+
+  // 마이크를 못 쓸 때: 1분 타이머만
+  const timerBtn = h("button", { class: "btn soft big", type: "button" });
+  let tId = null;
+  const drawTimer = (left) => timerBtn.replaceChildren(...withIcon(tId ? "stop" : "play",
+    tId ? t("loop.retell.left", { s: Math.ceil(left / 1000) }) : t("loop.retell.timer")));
+  timerBtn.onclick = () => {
+    if (tId) { clearInterval(tId); tId = null; drawTimer(0); return; }
+    const started = Date.now();
+    tId = setInterval(() => {
+      const left = RETELL_MAX_MS - (Date.now() - started);
+      if (left <= 0) { clearInterval(tId); tId = null; status.textContent = t("loop.retell.timeup"); }
+      drawTimer(left);
+    }, 250);
+    drawTimer(RETELL_MAX_MS);
+  };
+  drawTimer(0);
+
+  const written = h("textarea", { class: "gist-input", rows: 3, maxlength: 600, lang: "en", placeholder: t("loop.retell.write.ph"),
+    oninput: (ev) => Review.saveLoop(key, { retell_text: ev.currentTarget.value }) });
+  written.value = rec.retell_text ?? "";
+  const checks = ["main", "expr", "minute"].map((k) => h("label", { class: "check-line" },
+    h("input", { type: "checkbox", checked: rec.retell_check?.includes(k) ? "checked" : null, onchange: () => {
+      const on = [...checkBox.querySelectorAll("input")].map((x, i) => (x.checked ? ["main", "expr", "minute"][i] : null)).filter(Boolean);
+      Review.saveLoop(key, { retell_check: on });
+    } }), " ", t(`loop.retell.check.${k}`)));
+  const checkBox = h("div", {}, checks);
+
   return [
     h("h2", {}, t("loop.retell.title")),
-    h("ol", { class: "tips" },
-      h("li", {}, t("loop.retell.q1")),
-      h("li", {}, t(`retell.${topic}`))),
-    recWhy ? h("p", { class: "warn-line" }, t(`rec.why.${recWhy === "insecure" ? "insecure" : "unsupported"}`)) : [recBtn, status, play],
+    h("p", {}, t("loop.retell.desc")),
+    h("section", { class: "retell-box" },
+      h("p", { class: "small" }, h("b", {}, t("loop.retell.frame"))),
+      h("ol", { class: "tips", lang: "en" }, ["1", "2", "3"].map((n) => h("li", {}, t(`loop.retell.frame.${n}`)))),
+      exprs.length > 0 && h("p", { class: "small" }, h("b", {}, t("loop.retell.use"))),
+      exprs.length > 0 && h("div", { class: "btn-row" }, exprs.map((e) => h("span", { class: "chip small", lang: "en" }, e.text))),
+      h("p", { class: "small" }, h("b", {}, t("loop.retell.mine")), " ", t("loop.retell.q2"))),
+    h("div", { class: "retell-do" }, recWhy        // 화면 그리기는 목록을 한 겹만 펼친다 → div로 감싼다
+      ? [h("p", { class: "muted small" }, t(`rec.why.${recWhy === "insecure" ? "insecure" : "unsupported"}`)), timerBtn, status]
+      : [recBtn, status, play]),
+    h("details", { class: "retell-write" }, h("summary", {}, t("loop.retell.write")), written),
+    h("p", { class: "small" }, h("b", {}, t("loop.retell.check"))),
+    checkBox,
+    h("a", { class: "small", href: `#/loop/${c.id}/${sc.k + 1}/read` }, t("loop.retell.peek")),
     nextButton(c, sc, "retell", "loop.finish"),
   ];
 }
@@ -638,7 +697,7 @@ function rabbitMoment(occ) {
   }
   rabbitNext = false;
   const wear = occ?.wear;
-  const calm = occ?.solemn;
+  const calm = occ?.solemn || st.stage === "sick";
   const art = h("span", { class: `rabbit-stage${calm ? "" : " bounce"}` });
   const draw = (opts) => art.replaceChildren(Rabbit.el({ wear, label: t("rabbit.alt"), ...opts }, "rabbit-art"));
   const note = h("div", { class: "rabbit-note", "aria-live": "polite" });
@@ -661,12 +720,17 @@ function rabbitMoment(occ) {
     setTimeout(() => { draw({ chub: st.chub }); art.classList.add("puff"); }, 900);
     say(event === "grow" ? "rabbit.grew" : "rabbit.feast");
     if (event === "feast") setTimeout(chooser, 1600);
-  } else if (event === "full") { draw({ chub: st.chub, snack: st.snacks }); say("rabbit.full"); setTimeout(chooser, 1600); }
-  else if (event === "exercise") {
+  } else if (event === "full") {
+    draw({ chub: ev.from, snack: st.snacks });
+    setTimeout(() => { draw({ chub: st.chub }); art.classList.add("puff"); }, 900);
+    say("rabbit.full"); setTimeout(chooser, 1600);
+  } else if (event === "sick") { draw({ chub: st.chub, sick: true, wear: null }); say("rabbit.sick"); }
+  else if (event === "exercise" || event === "recover") {
     draw({ chub: ev.from, workout: true });                 // 운동하는 모습 → 원래 몸으로
     setTimeout(() => { draw({ chub: 0, workout: true }); art.classList.add("slim"); }, 1000);
-    say("rabbit.exercised");
-  } else {
+    say(event === "recover" ? "rabbit.recovered" : "rabbit.exercised");
+  } else if (st.stage === "sick") { draw({ chub: st.chub, sick: true, wear: null }); say("rabbit.sick"); }
+  else {
     draw({ chub: st.chub });
     if (st.stage === "choose" && !st.pending) chooser();   // 고르기 차례 (새로고침해도 고를 수 있게)
     else if (st.pending) say(st.pending === "food" ? "rabbit.chose.food" : "rabbit.chose.exercise");
