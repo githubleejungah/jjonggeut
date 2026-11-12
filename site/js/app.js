@@ -67,6 +67,7 @@ const ICONS = {
   mic: "M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z M5 11a7 7 0 0 0 14 0 M12 18v3",
   user: "M12 4a4 4 0 1 0 0 8a4 4 0 1 0 0-8z M4 21c0-4 3.6-7 8-7s8 3 8 7",
   both: "M9 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z M15 7a5 5 0 1 0 0 10a5 5 0 1 0 0-10z",
+  eye: "M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z M12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6z",
   speed: "M4 17a8 8 0 1 1 16 0 M12 17l4.5-5 M12 9v1.5",
   book: "M3 5.5C5.5 4 8.5 4 12 6c3.5-2 6.5-2 9-.5V19c-2.5-1.5-5.5-1.5-9 .5-3.5-2-6.5-2-9-.5z M12 6v13.5",
 };
@@ -304,7 +305,7 @@ function renderHome() {
   // 진행 링: 이어 할 콘텐츠의 마친 장면 수 / 전체 장면 수
   const total = cur ? cur.c.scenes.length : 1;
   const doneSteps = cur ? scenesDone(cur.c) : 0;
-  const met = Review.goalMet();
+  const met = Review.goalMet(Review.getCards());
   app.replaceChildren(
     h("p", { class: "tagline" }, t("app.tagline")),
     interests.length > 0 && h("p", { class: "interest-line" },
@@ -435,7 +436,7 @@ function inAppNotice() {
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
 const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url} ${r.status}`); return r.json(); });
-Promise.all([getJSON("i18n/ko.json?v=2026111211"), getJSON("data/contents.json?v=2026111211")])
+Promise.all([getJSON("i18n/ko.json?v=2026111212"), getJSON("data/contents.json?v=2026111212")])
   .then(([text, data]) => {
     state.text = text;
     state.contents = data.contents ?? [];

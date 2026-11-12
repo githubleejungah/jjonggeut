@@ -271,3 +271,17 @@ test("하루 목표: 루프 한 단계 이상 + 오늘 차례 복습을 끝내�
   Review.record("c1", { confidence: "sure", correct: true });
   assert.equal(Review.goalMet(terms), true);
 });
+
+// ----- 표현 카드 (2026-11-12 추가) -----
+test("표현 카드: 담으면 목록에 들어가고, 먼저 떠올린 결과로 복습이 시작된다", () => {
+  fresh("2026-11-12");
+  assert.equal(Review.addCard({ id: "voa-a:0", content_id: "voa-a", expr: 0, text: "take on" }, "knew"), true);
+  assert.equal(Review.addCard({ id: "voa-a:0", content_id: "voa-a", expr: 0, text: "take on" }, "knew"), false);  // 두 번 담지 않음
+  assert.equal(Review.getCards().length, 1);
+  assert.equal(Review.get("voa-a:0").next_review_at, "2026-11-13");         // 알았으면 내일 확인
+  Review.addCard({ id: "voa-a:1", content_id: "voa-a", expr: 1, text: "give out" }, "no");
+  assert.equal(Review.get("voa-a:1").status, "unknown");
+  setDate("2026-11-13");
+  const p = Review.plan(Review.getCards());
+  assert.equal(p.dueTotal, 2);                                               // 내일 둘 다 복습 차례
+});

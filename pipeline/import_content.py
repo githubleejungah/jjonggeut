@@ -42,13 +42,22 @@ def build(name: str, today: str) -> dict:
         if s.get("speaker"):
             item = {"start_ms": s["start_ms"], "end_ms": s["end_ms"], "speaker": s["speaker"], "en": s["en"], "ko": k}
         sentences.append(item)
+    extra = {}
+    expr_path = CAND / f"{name}.expr.json"          # 표현 익히기 (있을 때만)
+    if expr_path.exists():
+        ex = json.loads(expr_path.read_text(encoding="utf-8"))
+        extra = {"expressions": ex["expressions"], "glossary": ex.get("glossary", {})}
     return {
+        **extra,
         "id": name, "title": meta["title"], "title_ko": meta["title_ko"], "level": meta["level"],
         "topics": meta["topics"], "license_id": meta["license_id"], "source_url": meta["source_url"],
         "audio": {"src": aligned["audio"], "duration_ms": aligned["duration_ms"]},
         "added_at": today, "reviewed": True, "sentences": sentences,
         "scenes": split_scenes(sentences, meta["level"]),
     }
+
+
+TYPE_KO = {"phrasal_verb": "구동사", "idiom": "관용 표현", "chunk": "덩어리 표현", "word": "단어"}
 
 
 def ms(t: int) -> str:
@@ -69,6 +78,17 @@ def preview(names: list[str], today: str) -> Path:
             row = [str(i), ms(s["start_ms"]), s.get("speaker", ""), s["en"].replace("|", "/"), s["ko"].replace("|", "/")]
             lines.append("| " + " | ".join(row) + " |")
         lines.append("")
+        if c.get("expressions"):
+            esc = lambda x: str(x).replace("|", "/")
+            lines += ["### 표현 익히기", "",
+                      "| 장면 | 표현 | 종류 | 뜻 | 쓰임 메모 | 예문 |", "|---|---|---|---|---|---|"]
+            for e in c["expressions"]:
+                exs = " / ".join(f"{x['en']} ({x['ko']})" for x in e["examples"])
+                lines.append(f"| {e['scene'] + 1} | **{esc(e['text'])}** | {TYPE_KO.get(e['type'], e['type'])} | {esc(e['meaning_ko'])} | {esc(e['note_ko'])} | {esc(exs)} |")
+            lines += ["", "### 단어 뜻 (누르면 나오는 것)", "", "| 단어 | 등급 | 뜻 |", "|---|---|---|"]
+            for w, g in c.get("glossary", {}).items():
+                lines.append(f"| {w} | {g['cefr']} | {esc(g['ko'])} |")
+            lines.append("")
     REPORTS.mkdir(parents=True, exist_ok=True)
     out = REPORTS / f"번역미리보기_{today}.md"
     out.write_text("\n".join(lines), encoding="utf-8")

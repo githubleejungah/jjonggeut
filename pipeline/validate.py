@@ -23,6 +23,8 @@ LEVELS = {"A1", "A2", "B1", "B2", "C1", "C2"}
 TOPICS = {"work", "travel", "daily", "food", "health", "science", "culture", "sports", "news"}
 LICENSE_KINDS = {"public_domain", "cc_by", "cc_by_sa", "contract", "own"}
 OVERLAP_MS = 150   # 문장 경계 허용 오차 (비기능 요구사항)
+EXPR_TYPES = {"phrasal_verb", "idiom", "chunk", "word"}
+MAX_EXPR_PER_SCENE = 4
 SCENE_MAX_MS = {"A1": 30000, "A2": 30000, "B1": 60000, "B2": 120000, "C1": 120000, "C2": 120000}  # scenes.py와 같게
 
 
@@ -132,6 +134,34 @@ def validate(data: dict, site_dir: Path = SITE, today: str | None = None) -> lis
             else:
                 if expect != len(sents):
                     err(f"{where}: 장면이 마지막 문장까지 덮지 않습니다")
+
+        # 표현 익히기 (있을 때만). 장면마다 최대 4개: 작업 기억이 한 번에 다루는 덩어리 약 4개 (Cowan, 2001)
+        per_scene: dict[int, int] = {}
+        for e_i, ex in enumerate(c.get("expressions") or []):
+            ew = f"{where} 표현 {e_i + 1} ({ex.get('text', '?')})"
+            k, si = ex.get("scene"), ex.get("sentence")
+            if not isinstance(k, int) or not scenes or not 0 <= k < len(scenes):
+                err(f"{ew}: 장면 번호가 없습니다")
+                continue
+            if not isinstance(si, int) or not scenes[k]["from"] <= si <= scenes[k]["to"]:
+                err(f"{ew}: 문장 번호가 그 장면 안에 없습니다")
+            elif ex.get("match", "") not in sents[si]["en"]:
+                err(f"{ew}: '{ex.get('match')}'가 문장에 그대로 없습니다")
+            if ex.get("type") not in EXPR_TYPES:
+                err(f"{ew}: 종류는 {sorted(EXPR_TYPES)} 중 하나여야 합니다")
+            for key in ("text", "meaning_ko", "note_ko"):
+                if not str(ex.get(key, "")).strip():
+                    err(f"{ew}: '{key}' 칸이 비어 있습니다")
+            exs = ex.get("examples") or []
+            if not 1 <= len(exs) <= 3 or any(not x.get("en") or not x.get("ko") for x in exs):
+                err(f"{ew}: 예문은 영어·한국어가 있는 1~3개여야 합니다")
+            per_scene[k] = per_scene.get(k, 0) + 1
+        for k, n_ex in per_scene.items():
+            if n_ex > MAX_EXPR_PER_SCENE:
+                err(f"{where} 장면 {k + 1}: 표현이 {n_ex}개입니다 (최대 {MAX_EXPR_PER_SCENE}개)")
+        for word, g in (c.get("glossary") or {}).items():
+            if not g.get("ko") or g.get("cefr") not in LEVELS:
+                err(f"{where} 단어 '{word}': 뜻(ko)과 등급(cefr)이 있어야 합니다")
     return errors
 
 

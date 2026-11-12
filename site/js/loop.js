@@ -142,7 +142,7 @@ function finishStep(c, sc, step) {
   Review.markLoopStep(sceneKey(c, sc.k), step);
   const steps = Review.LOOP_STEPS;
   const next = steps[steps.indexOf(step) + 1];
-  const firstGoal = Review.goalMet() && Review.getSettings().celebrated_on !== Review.today();
+  const firstGoal = Review.goalMet(Review.getCards()) && Review.getSettings().celebrated_on !== Review.today();
   if (firstGoal) Review.setSettings({ celebrated_on: Review.today() });
   if (firstGoal || !next) location.hash = `#/done/${c.id}/${sc.k + 1}`;    // 하루 한 번 축하 (F-22)
   else location.hash = `#/loop/${c.id}/${sc.k + 1}/${next}`;
@@ -232,13 +232,13 @@ function gistPanel(c, sc) {
 }
 
 // 대본 한 줄. 누르면 그 문장만 듣는다. 읽는 줄은 형광펜(글자 밑 띠)으로 표시
-function sentenceRow(c, i, showKo, extra = null) {
+function sentenceRow(c, i, showKo, extra = null, gloss = null) {
   const s = c.sentences[i];
   return h("li", { class: "sent", "data-i": i },
     h("button", { class: "sent-play", type: "button", "aria-label": t("loop.play.one"),
       onclick: () => loopView.player.playSentences(c.sentences, [i]) },
       s.speaker && h("span", { class: "speaker" }, s.speaker),
-      h("span", { class: "sent-en", lang: "en" }, s.en),
+      h("span", { class: "sent-en", lang: "en" }, ...(gloss ? glossText(s.en, gloss) : [s.en])),
       showKo && h("span", { class: "sent-ko" }, s.ko)),
     extra);
 }
@@ -253,13 +253,53 @@ function followReading(list) {
   };
 }
 
+
+/* ---------- 단어 뜻 (주석, glossary) ----------
+   교재 수준보다 높은 단어만 대본에 옅은 밑줄을 긋고, 장면 아래 '이 장면 단어'에서 누르면 뜻이 나온다.
+   처음부터 모든 뜻을 펼치지 않는 이유: 한 번에 받아들이는 양을 줄이기 위해 (인지 부하) */
+function lemmaOf(word, glossary) {
+  const w = word.toLowerCase().replace(/’/g, "'");
+  const tries = [w, w.replace(/s$/, ""), w.replace(/es$/, ""), w.replace(/ed$/, ""), w.replace(/d$/, ""),
+    w.replace(/ing$/, ""), w.replace(/ing$/, "e"), w.replace(/ly$/, "")];
+  return tries.find((x) => glossary[x]) ?? null;
+}
+function sceneWords(c, sc) {
+  const g = c.glossary ?? {};
+  const found = new Map();
+  for (const i of sc.idx) {
+    for (const tok of c.sentences[i].en.match(/[A-Za-z'’]+/g) ?? []) {
+      const lemma = lemmaOf(tok, g);
+      if (lemma) found.set(lemma, g[lemma]);
+    }
+  }
+  return found;
+}
+function glossText(text, words) {
+  return text.split(/([A-Za-z'’]+)/).map((part) => {
+    const lemma = /[A-Za-z]/.test(part) ? lemmaOf(part, Object.fromEntries(words)) : null;
+    return lemma ? h("span", { class: "gl" }, part) : part;
+  });
+}
+function wordBox(c, words) {
+  if (!words.size) return null;
+  const meaning = h("p", { class: "word-meaning", "aria-live": "polite" });
+  return h("div", { class: "word-box" },
+    h("p", { class: "small" }, h("b", {}, t("words.title"))),
+    h("div", { class: "btn-row" }, [...words].map(([w, g]) =>
+      h("button", { class: "chip small", type: "button", lang: "en", onclick: () => {
+        meaning.replaceChildren(h("b", { lang: "en" }, w), " ", h("span", { class: "level-badge" }, g.cefr), " ", g.ko);
+      } }, w))),
+    meaning);
+}
+
 /* 3. 대본 보며 듣기 + 요지 확인 */
 function readPanel(c, sc) {
   const p = loopView.player;
   p.listeners.clear();
   let showKo = Review.getSettings().show_ko ?? false;
   const list = h("ol", { class: "sent-list" });
-  const drawList = () => list.replaceChildren(...sc.idx.map((i) => sentenceRow(c, i, showKo)));
+  const words = sceneWords(c, sc);
+  const drawList = () => list.replaceChildren(...sc.idx.map((i) => sentenceRow(c, i, showKo, null, words)));
   drawList();
   followReading(list);
   const modeBtn = h("button", { class: "chip small", type: "button", "aria-pressed": String(showKo), onclick: () => {
@@ -280,6 +320,7 @@ function readPanel(c, sc) {
     h("p", {}, t("loop.read.desc")),
     h("div", { class: "btn-row" }, modeBtn),
     list,
+    wordBox(c, words),
     rec.gist && h("div", { class: "gist-check" },
       h("p", {}, h("b", {}, t("loop.gist.mine")), " ", rec.gist),
       h("p", { class: "muted small" }, t("loop.gist.ask")), scoreRow),
@@ -288,12 +329,94 @@ function readPanel(c, sc) {
   ];
 }
 
-/* 4. 표현 모으기 (4단계에서 연다) */
+/* 4. 표현 익히기 (F-09, 2026-11-12 설계)
+   장면마다 핵심 표현 3~4개 (작업 기억이 다루는 덩어리 약 4개: Cowan, 2001)
+   ① 대본 속 표현을 보고 들으며 먼저 뜻을 떠올린다 (먼저 떠올리기: Kornell 외, 2009)
+   ② 뜻·쓰임·비슷한 표현·바꿔 쓴 예문을 본다 (주석: Yanagisawa 외, 2020)
+   ③ 관심사 상황으로 내 문장을 만든다 (관여도: Laufer & Hulstijn, 2001)
+   ④ 떠올린 결과와 함께 카드에 담아 간격 반복을 시작한다 */
+const TYPE_KEY = { phrasal_verb: "expr.type.phrasal", idiom: "expr.type.idiom", chunk: "expr.type.chunk", word: "expr.type.word" };
+
+// 문장에서 표현 부분만 형광펜(글자 밑 띠)으로 표시
+function markText(text, match) {
+  const at = text.indexOf(match);
+  if (at < 0) return [text];
+  return [text.slice(0, at), h("mark", { class: "hl" }, match), text.slice(at + match.length)];
+}
+
 function chunkPanel(c, sc) {
+  const p = loopView.player;
+  p.listeners.clear();
+  const list = (c.expressions ?? []).map((e, n) => ({ ...e, n })).filter((e) => e.scene === sc.k);
+  if (!list.length) {
+    return [
+      h("h2", {}, t("loop.chunk.title")),
+      h("p", {}, t("expr.none")),
+      h("a", { class: "btn primary wide", href: `#/loop/${c.id}/${sc.k + 1}/shadow` }, ...withIcon("arrow", t("loop.skip"))),
+    ];
+  }
+  const interests = Review.getSettings().interests;
+  const topic = c.topics.find((x) => interests.includes(x)) ?? interests[0] ?? "daily";
+  const box = h("div", {});
+  let pos = 0;
+
+  const show = () => {
+    const e = list[pos];
+    const id = `${c.id}:${e.n}`;
+    const s = c.sentences[e.sentence];
+    const already = Review.hasCard(id);
+    let guess = null;
+
+    const reveal = h("div", { class: "expr-reveal", hidden: true });
+    const revealBtn = h("button", { class: "btn soft wide", type: "button" }, ...withIcon("eye", t("expr.reveal")));
+    const mine = h("textarea", { class: "gist-input", rows: 2, maxlength: 200, lang: "en",
+      placeholder: t("expr.mine.placeholder") });
+    const guessRow = h("div", { class: "btn-row" }, ["knew", "close", "no"].map((g) =>
+      h("button", { class: "chip small", type: "button", "aria-pressed": "false", onclick: (ev) => {
+        guess = g;
+        guessRow.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === ev.currentTarget)));
+        save.disabled = false;
+      } }, t(`expr.guess.${g}`))));
+    const last = pos === list.length - 1;
+    const save = h("button", { class: "btn primary wide", type: "button", disabled: !already, onclick: () => {
+      if (!already) Review.addCard({ id, content_id: c.id, expr: e.n, text: e.text, mine: mine.value.trim() || undefined }, guess ?? "no");
+      if (last) finishStep(c, sc, "chunk");
+      else { pos += 1; show(); }
+    } }, ...withIcon("arrow", t(already ? (last ? "expr.done" : "expr.next") : (last ? "expr.save.done" : "expr.save"))));
+
+    // h()로 감싸야 목록(배열)과 빈 값(false)이 알맞게 처리된다 (append는 배열을 글자로 바꿔 버린다)
+    reveal.append(h("div", {},
+      h("p", { class: "expr-meaning" }, e.meaning_ko),
+      h("p", { class: "expr-note" }, e.note_ko),
+      e.similar?.length > 0 && h("p", { class: "muted small" }, t("expr.similar"), " ", h("span", { lang: "en" }, e.similar.join(", "))),
+      h("ul", { class: "expr-examples" }, e.examples.map((x) =>
+        h("li", {}, h("span", { lang: "en", class: "sent-en" }, x.en), h("span", { class: "sent-ko" }, x.ko)))),
+      already
+        ? h("p", { class: "goal-line" }, icon("check"), t("expr.already"))
+        : [h("p", { class: "small" }, h("b", {}, t("expr.guess.ask"))), guessRow],
+      h("p", { class: "small" }, h("b", {}, t("expr.mine")), " ", t(`expr.mine.${topic}`)),
+      mine));
+    revealBtn.onclick = () => { reveal.hidden = false; revealBtn.hidden = true; save.hidden = false; };
+    save.hidden = true;
+
+    box.replaceChildren(
+      h("p", { class: "muted small" }, t("expr.count", { n: pos + 1, total: list.length })),
+      h("div", { class: "expr-card" },
+        h("span", { class: "expr-type" }, t(TYPE_KEY[e.type])),
+        h("p", { class: "expr-text", lang: "en" }, e.text),
+        h("button", { class: "sent-play", type: "button", onclick: () => p.playSentences(c.sentences, [e.sentence]) },
+          s.speaker && h("span", { class: "speaker" }, s.speaker),
+          h("span", { class: "sent-en", lang: "en" }, ...markText(s.en, e.match)),
+          h("span", { class: "muted small" }, icon("play"), " ", t("loop.play.one")))),
+      h("p", { class: "expr-ask" }, t("expr.ask")),
+      revealBtn, reveal, save);
+  };
+  show();
   return [
     h("h2", {}, t("loop.chunk.title")),
-    h("p", {}, t("loop.chunk.soon")),
-    h("a", { class: "btn primary wide", href: `#/loop/${c.id}/${sc.k + 1}/shadow` }, ...withIcon("arrow", t("loop.skip"))),
+    h("p", {}, t("loop.chunk.desc")),
+    box,
+    h("a", { class: "btn wide", href: `#/loop/${c.id}/${sc.k + 1}/shadow` }, t("loop.skip")),
   ];
 }
 
@@ -396,7 +519,7 @@ function retellPanel(c, sc) {
 function renderDone(id, sceneNo) {
   renderTopbar(false);
   const c = contentById(id);
-  const met = Review.goalMet();
+  const met = Review.goalMet(Review.getCards());
   const todayScenes = Object.keys(Review.loopToday()).length;
   const k = (Number(sceneNo) || 1) - 1;
   const nextScene = c && k + 1 < c.scenes.length ? k + 2 : null;

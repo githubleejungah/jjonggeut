@@ -314,6 +314,23 @@ const Review = (() => {
 
   function loopToday() { return read("looplog", {})[today()] ?? {}; }
 
+  // ----- 표현 카드 (F-09, 2026-11-12) -----
+  // jg:v1:cards = [{ id, content_id, expr, text, added_at, sentence? }]  내가 모은 표현 카드 목록
+  // 카드를 담을 때 '먼저 떠올려 본 결과'(확신도 × 맞음)를 첫 기록으로 남겨 간격 반복을 시작한다.
+  //   알았음 → sure/맞음(상자 1, 내일), 비슷했음 → unsure/맞음, 몰랐음 → dontknow (내일 다시)
+  const GUESS = { knew: ["sure", true], close: ["unsure", true], no: ["dontknow", false] };
+  function getCards() { return read("cards", []); }
+  function hasCard(id) { return getCards().some((c) => c.id === id); }
+  function addCard(card, guess = "no") {
+    const cards = getCards();
+    if (cards.some((c) => c.id === card.id)) return false;
+    cards.push({ ...card, added_at: today() });
+    write("cards", cards);
+    const [confidence, correct] = GUESS[guess] ?? GUESS.no;
+    record(card.id, { confidence, correct, quiz: "guess" });
+    return true;
+  }
+
   // 하루 목표 달성 (2026-11-11 결정): 오늘 차례인 복습을 끝내고 루프를 한 단계 이상 했다
   // terms: 복습 카드 목록 (4단계 전에는 빈 목록)
   function goalMet(terms = []) {
@@ -426,6 +443,7 @@ const Review = (() => {
     plan, counts, makeQuiz, today, addDays, useStore, useClock,
     getLog, ensureLog, stats, exportAll, importAll, planWrap, practice, markWrapped,
     getLoop, saveLoop, markLoopStep, loopToday, goalMet, LOOP_STEPS,
+    getCards, hasCard, addCard,
     INTERVALS, MAINTAIN_BOX,
   };
 })();
