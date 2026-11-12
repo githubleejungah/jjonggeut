@@ -12,6 +12,26 @@
       "excludes": "AP·로이터·AFP 같은 통신사의 기사·사진·영상은 쓰지 않는다"
     }
   ],
+  "series": [
+    {
+      "id": "lle2",
+      "title": "Let's Learn English — Level 2",
+      "title_ko": "기초 영어 2단계 (드라마)",
+      "kind": "course"
+    },
+    {
+      "id": "travel",
+      "title": "Words to Travel With",
+      "title_ko": "여행 영어",
+      "kind": "course"
+    },
+    {
+      "id": "wts",
+      "title": "Words and Their Stories",
+      "title_ko": "표현과 그 유래",
+      "kind": "collection"
+    }
+  ],
   "contents": [
     {
       "expressions": [
@@ -808,6 +828,8 @@
         "src": "audio/voa-lle2-02-interview.mp3",
         "duration_ms": 245373
       },
+      "series": "lle2",
+      "series_no": 2,
       "added_at": "2026-11-12",
       "reviewed": true,
       "sentences": [
@@ -2248,6 +2270,8 @@
         "src": "audio/voa-travel-airports.mp3",
         "duration_ms": 426216
       },
+      "series": "travel",
+      "series_no": 2,
       "added_at": "2026-11-12",
       "reviewed": true,
       "sentences": [
@@ -3337,6 +3361,8 @@
         "src": "audio/voa-strikes-a-chord.mp3",
         "duration_ms": 314742
       },
+      "series": "wts",
+      "series_no": 1,
       "added_at": "2026-11-12",
       "reviewed": true,
       "sentences": [
@@ -3372,12 +3398,12 @@
         },
         {
           "start_ms": 41120,
-          "end_ms": 47280,
+          "end_ms": 47180,
           "en": "A chord is three or more musical notes sounded at the same time.",
           "ko": "코드(chord)는 세 개 이상의 음을 동시에 내는 화음이에요."
         },
         {
-          "start_ms": 49520,
+          "start_ms": 47380,
           "end_ms": 53080,
           "en": "The word “strike” means to hit.",
           "ko": "'strike'라는 낱말은 친다는 뜻이에요."

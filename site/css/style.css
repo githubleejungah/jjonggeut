@@ -16,6 +16,7 @@
   --border: #eadfd6;
   --accent: #a8475f;          /* 주요 버튼·링크 (진한 복숭아·장미색). 흰 글자와 대비 5.6:1 */
   --accent-soft: #f9e6e8;
+  --pen: #ffe27a;             /* 형광펜(노랑). 모든 테마 공통 */
   --accent-ink: #7d2f43;      /* 연한 바탕 위의 진한 글자 */
   --peach: #f8c9b8;
   --ring-from: #f4a6b8;
@@ -38,6 +39,7 @@
     --border: #3a3230;
     --accent: #f0a3b5;
     --accent-soft: #3a2a2e;
+    --pen: #6e5b16;
     --accent-ink: #f7c6d1;
     --ring-from: #f4a6b8;
     --ring-to: #e07f97;
@@ -308,7 +310,8 @@ h3 { font-size: 1.05rem; margin: 0 0 8px; }
 .gap-note { min-height: 1.5em; margin: 4px 0; color: var(--accent-ink); font-weight: 700; text-align: center; }
 /* 장면 고르기 */
 .scene-label { margin: -6px 0 6px; }
-.scene-row { display: flex; gap: 6px; overflow-x: auto; padding: 2px 2px 8px; margin-bottom: 4px; }
+/* 장면 칩: 옆으로 넘기지 않고 줄을 바꿔 감싼다 (2026-11-12) */
+.scene-row { display: flex; flex-wrap: wrap; gap: 6px; padding: 2px 2px 8px; margin-bottom: 4px; }
 .scene-chip {
   flex: none; display: inline-flex; align-items: center; gap: 2px; min-width: 40px; height: 36px; padding: 0 10px;
   justify-content: center; border-radius: 999px; border: 1.5px solid var(--border); background: var(--surface);
@@ -365,3 +368,49 @@ mark.hl { background: linear-gradient(transparent 58%, var(--accent-soft) 58%); 
 @media (prefers-reduced-motion: reduce) {
   * { transition: none !important; animation: none !important; }
 }
+
+/* 형광펜 밑줄 (2026-11-12): 표현의 뜻을 눈에 띄게. 글자 아래로 띄워 긋고(offset),
+   글자 획과 겹치는 곳은 건너뛴다(skip-ink). 색만이 아니라 굵은 선 모양으로도 구분된다 */
+.pen {
+  text-decoration-line: underline;
+  text-decoration-color: var(--pen);
+  text-decoration-thickness: 0.42em;
+  text-underline-offset: 0.14em;
+  text-decoration-skip-ink: auto;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* 콘텐츠 고르기: 시리즈 묶음 (2026-11-12) */
+.level-filter { margin: 12px 0 4px; }
+details.series { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); margin: 10px 0; }
+details.series > summary {
+  list-style: none; cursor: pointer; min-height: 44px; padding: 12px 14px;
+  display: flex; align-items: center; flex-wrap: wrap; gap: 6px 8px;
+}
+details.series > summary::-webkit-details-marker { display: none; }
+details.series > summary::after {
+  content: ""; margin-left: auto; width: 8px; height: 8px;
+  border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg);
+}
+details.series[open] > summary::after { transform: rotate(-135deg); }
+details.series > summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 14px; }
+.series-body { padding: 0 14px 14px; }
+.lesson-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(44px, 1fr)); gap: 6px; margin-top: 8px; }
+.lesson-tile {
+  position: relative; display: grid; place-items: center; height: 44px; border-radius: 12px;
+  border: 1px solid var(--border); background: var(--bg); color: var(--text); font-weight: 700; text-decoration: none;
+}
+.lesson-tile.doing { border: 2px solid var(--accent); }
+.lesson-tile.done { background: var(--accent-soft); border-color: var(--accent-soft); color: var(--accent-ink); }
+.lesson-tile .icon { position: absolute; top: 3px; right: 3px; width: 12px; height: 12px; stroke-width: 3; }
+.lesson-tile .bar { position: absolute; left: 7px; right: 7px; bottom: 5px; height: 3px; border-radius: 2px; background: var(--border); overflow: hidden; }
+.lesson-tile .bar > i { display: block; height: 100%; background: var(--accent); }
+.next-label { margin: 0 0 4px; }
+.lesson-row {
+  display: flex; align-items: center; gap: 10px; min-height: 44px; padding: 10px 2px;
+  border-top: 1px solid var(--border); color: inherit; text-decoration: none;
+}
+.lesson-row:first-child { border-top: 0; }
+.lesson-row .grow { flex: 1; min-width: 0; display: grid; }
+.lesson-row .grow > * { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }

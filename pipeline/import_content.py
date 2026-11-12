@@ -42,6 +42,12 @@ def build(name: str, today: str) -> dict:
         if s.get("speaker"):
             item = {"start_ms": s["start_ms"], "end_ms": s["end_ms"], "speaker": s["speaker"], "en": s["en"], "ko": k}
         sentences.append(item)
+    # 사람이 귀로 듣고 정한 시각 고침 (2026-11-12). 번호는 화자를 뺀 뒤의 문장 번호(0부터).
+    # 예: 음악 편 'at the same time' 바로 뒤에 음악이 시작돼, 문장 끝에서 음악 머리가 들렸다가 끊겼다.
+    for key, fix in meta.get("timing_fix", {}).items():
+        for k in ("start_ms", "end_ms"):
+            if k in fix:
+                sentences[int(key)][k] = fix[k]
     extra = {}
     expr_path = CAND / f"{name}.expr.json"          # 표현 익히기 (있을 때만)
     if expr_path.exists():
@@ -52,6 +58,7 @@ def build(name: str, today: str) -> dict:
         "id": name, "title": meta["title"], "title_ko": meta["title_ko"], "level": meta["level"],
         "topics": meta["topics"], "license_id": meta["license_id"], "source_url": meta["source_url"],
         "audio": {"src": aligned["audio"], "duration_ms": aligned["duration_ms"]},
+        **({"series": meta["series"], "series_no": meta["series_no"]} if meta.get("series") else {}),
         "added_at": today, "reviewed": True, "sentences": sentences,
         # 사람이 정한 장면 경계가 있으면 그것을 쓴다 (2026-11-12). 시각을 다시 맞추면 쉼 길이가 바뀌어
         # 자동 경계가 움직이는데, 장면 번호에 학습 기록이 묶여 있고 이야기 흐름은 사람이 더 잘 본다.

@@ -66,28 +66,96 @@ function sortedContents() {
     .sort((a, b) => LEVEL_ORDER.indexOf(a.level) - LEVEL_ORDER.indexOf(b.level) || score(b) - score(a));
 }
 
+function contentCard(c) {
+  const interests = new Set(Review.getSettings().interests);
+  const match = c.topics.some((x) => interests.has(x));
+  const avg = Math.round(c.audio.duration_ms / c.scenes.length / 1000);
+  return h("a", { class: "content-card", href: `#/loop/${c.id}/${firstOpenScene(c) + 1}` },
+    h("span", { class: "content-meta" },
+      h("span", { class: "level-badge" }, c.level),
+      h("span", {}, c.topics.map((x) => t(`interest.${x}`)).join(" · ")),
+      match && h("span", { class: "match-tag" }, icon("check"), t("library.match"))),
+    h("b", { class: "content-title" }, c.title_ko),
+    h("span", { class: "content-en", lang: "en" }, c.title),
+    h("span", { class: "content-foot" },
+      t("library.scenes", { n: c.scenes.length, s: avg }), " · ",
+      t("library.progress", { n: scenesDone(c), total: c.scenes.length })));
+}
+
+const contentFinished = (c) => scenesDone(c) === c.scenes.length;
+const LIB_LEVEL_KEY = "jg:v1:ui:library-level";   // 고른 수준 필터 (이 기기에서만 기억하는 편의 기능)
+
+// 콘텐츠 고르기 (2026-11-12 개편): 과가 52개처럼 많아져도 한 화면에서 고르도록
+//   맨 위 '이어 하기' → 수준 필터 → 시리즈별 접는 묶음.
+//   과정(course)은 번호 칸 바둑판(한 줄 6~7칸), 모음(collection)은 제목 한 줄 목록.
 function renderLibrary() {
   renderTopbar(false);
-  const interests = new Set(Review.getSettings().interests);
-  const items = sortedContents().map((c) => {
-    const match = c.topics.some((x) => interests.has(x));
-    const avg = Math.round(c.audio.duration_ms / c.scenes.length / 1000);
-    return h("a", { class: "content-card", href: `#/loop/${c.id}/${firstOpenScene(c) + 1}` },
-      h("span", { class: "content-meta" },
-        h("span", { class: "level-badge" }, c.level),
-        h("span", {}, c.topics.map((x) => t(`interest.${x}`)).join(" · ")),
-        match && h("span", { class: "match-tag" }, icon("check"), t("library.match"))),
-      h("b", { class: "content-title" }, c.title_ko),
-      h("span", { class: "content-en", lang: "en" }, c.title),
-      h("span", { class: "content-foot" },
-        t("library.scenes", { n: c.scenes.length, s: avg }), " · ",
-        t("library.progress", { n: scenesDone(c), total: c.scenes.length })));
-  });
-  app.replaceChildren(
+  const all = sortedContents();
+  const levels = LEVEL_ORDER.filter((l) => all.some((c) => c.level === l));
+  let level = "all";
+  try { level = localStorage.getItem(LIB_LEVEL_KEY) ?? "all"; } catch { /* 저장소를 못 써도 화면은 그린다 */ }
+  if (level !== "all" && !levels.includes(level)) level = "all";
+
+  // 이어 하기: 가장 최근에 손댄, 아직 다 마치지 않은 콘텐츠
+  const recent = all.filter((c) => !contentFinished(c)).map((c) => ({ c, last: lastTouched(c) })).filter((x) => x.last)
+    .sort((a, b) => b.last.rec.updated_at.localeCompare(a.last.rec.updated_at))[0]?.c ?? null;
+
+  const body = h("div", {});
+  const draw = () => {
+    const shown = all.filter((c) => level === "all" || c.level === level);
+    const groups = [...state.series, { id: null, title_ko: t("library.other"), kind: "collection" }]
+      .map((se) => ({ se, items: shown.filter((c) => (c.series ?? null) === se.id) }))
+      .filter((g) => g.items.length);
+    const openId = groups.find((g) => g.items.includes(recent))?.se.id ?? groups[0]?.se.id;
+    body.replaceChildren(...groups.map((g) => seriesGroup(g.se, g.items, g.se.id === openId, recent)));
+  };
+  const filter = levels.length > 1 && h("div", { class: "btn-row level-filter", role: "group", "aria-label": t("library.filter") },
+    ["all", ...levels].map((l) => h("button", { class: "chip small", type: "button", "aria-pressed": String(l === level),
+      onclick: (ev) => {
+        level = l;
+        try { localStorage.setItem(LIB_LEVEL_KEY, l); } catch { /* 무시 */ }
+        ev.currentTarget.parentElement.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b === ev.currentTarget)));
+        draw();
+      } }, l === "all" ? t("library.level.all") : l)));
+  draw();
+  app.replaceChildren(...[
     h("h2", {}, t("library.title")),
     h("p", { class: "muted small" }, t("library.desc")),
-    h("div", { class: "content-list" }, items),
-    attributionNote(state.contents));
+    recent && h("p", { class: "small" }, h("b", {}, t("library.continue"))),
+    recent && contentCard(recent),
+    filter,
+    body,
+    attributionNote(state.contents)].filter(Boolean));   // replaceChildren은 빈 값을 글자로 넣는다
+}
+
+function seriesGroup(se, items, open, recentId) {
+  items = [...items].sort((a, b) => (a.series_no ?? 0) - (b.series_no ?? 0));
+  const done = items.filter(contentFinished).length;
+  const levels = [...new Set(items.map((c) => c.level))];
+  const next = items.find((c) => !contentFinished(c));
+  const inner = se.kind === "course"
+    ? [next && next !== recentId && h("p", { class: "small muted next-label" }, t("library.next")),
+      next && next !== recentId && contentCard(next),
+      h("div", { class: "lesson-grid" }, items.map((c) => {
+        const n = scenesDone(c);
+        const started = n > 0 || lastTouched(c) !== null;
+        const label = t("library.lesson.label", { n: c.series_no, title: c.title_ko, done: n, total: c.scenes.length });
+        return h("a", { class: `lesson-tile${contentFinished(c) ? " done" : started ? " doing" : ""}`,
+          href: `#/loop/${c.id}/${firstOpenScene(c) + 1}`, "aria-label": label, title: label },
+          contentFinished(c) && icon("check"),
+          String(c.series_no),
+          !contentFinished(c) && started && h("span", { class: "bar" }, h("i", { style: `width:${Math.round(n / c.scenes.length * 100)}%` })));
+      }))]
+    : items.map((c) => h("a", { class: "lesson-row", href: `#/loop/${c.id}/${firstOpenScene(c) + 1}` },
+        h("span", { class: "level-badge" }, c.level),
+        h("span", { class: "grow" }, h("b", {}, c.title_ko), h("span", { class: "content-en", lang: "en" }, c.title)),
+        contentFinished(c) ? icon("check") : h("span", { class: "muted small" }, `${scenesDone(c)}/${c.scenes.length}`)));
+  return h("details", { class: "series", open },
+    h("summary", {},
+      h("b", {}, se.title_ko),
+      levels.map((l) => h("span", { class: "level-badge" }, l)),
+      h("span", { class: "muted small" }, t("library.series.progress", { n: done, total: items.length }))),
+    h("div", { class: "series-body" }, inner));
 }
 
 function attributionNote(contents) {
@@ -386,7 +454,7 @@ function chunkPanel(c, sc) {
 
     // h()로 감싸야 목록(배열)과 빈 값(false)이 알맞게 처리된다 (append는 배열을 글자로 바꿔 버린다)
     reveal.append(h("div", {},
-      h("p", { class: "expr-meaning" }, e.meaning_ko),
+      h("p", { class: "expr-meaning" }, h("span", { class: "pen" }, e.meaning_ko)),
       h("p", { class: "expr-note" }, e.note_ko),
       e.similar?.length > 0 && h("p", { class: "muted small" }, t("expr.similar"), " ", h("span", { lang: "en" }, e.similar.join(", "))),
       h("ul", { class: "expr-examples" }, e.examples.map((x) =>

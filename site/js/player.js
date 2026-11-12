@@ -98,6 +98,23 @@ const Player = (() => {
         }, 100);
       },
 
+      // 재생 위치를 50ms마다 보다가 endMs에서 멈추고 then()을 부른다.
+      // 끝까지 0.1초도 안 남으면 남은 시간만큼만 기다렸다 멈춘다 (2026-11-12). 50ms 간격으로만 보면
+      // 끝을 넘어 다음 소리(음악·다음 말)의 머리가 들렸다가 끊겼다.
+      watchEnd(endMs, my, onTick, then) {
+        clearInterval(this.timer);
+        this.timer = setInterval(() => {
+          if (my !== this.token) return;
+          const now = audio.currentTime * 1000;
+          onTick?.(now);
+          const left = (endMs - now) / this.rate;
+          if (!audio.ended && left > 100) return;
+          clearInterval(this.timer);
+          const stop = () => { if (my === this.token) { audio.pause(); then(); } };
+          if (audio.ended || left <= 0) stop();
+          else this.gapTimer = setTimeout(stop, left);
+        }, 50);
+      },
       pause() { this.token += 1; clearInterval(this.timer); clearTimeout(this.gapTimer); audio.pause(); this.setStatus("paused"); },
       resume(sentences) { this.playAll(sentences, audio.currentTime * 1000); },
 
@@ -117,26 +134,20 @@ const Player = (() => {
             audio.currentTime = fromMs / 1000;
             audio.play().catch(() => this.setStatus("idle"));
             this.setStatus("playing");
-            clearInterval(this.timer);
-            this.timer = setInterval(() => {
-              if (my !== this.token) return;
-              const now = audio.currentTime * 1000;
+            this.watchEnd(toMs, my, (now) => {
               const i = sentenceAt(sentences, now);
               if (i !== this.index) { this.index = i; this.onSentence?.(i); }
-              if (now >= toMs || audio.ended) {
-                clearInterval(this.timer);
-                audio.pause();
-                if (round < repeat) {
-                  this.setStatus("gap");
-                  this.onGap?.(-1, rest);
-                  this.gapTimer = setTimeout(go, rest);
-                } else {
-                  this.setStatus("idle");
-                  this.onSentence?.(-1);
-                  onDone?.();
-                }
+            }, () => {
+              if (round < repeat) {
+                this.setStatus("gap");
+                this.onGap?.(-1, rest);
+                this.gapTimer = setTimeout(go, rest);
+              } else {
+                this.setStatus("idle");
+                this.onSentence?.(-1);
+                onDone?.();
               }
-            }, 50);
+            });
           };
           go();
         }, () => this.setStatus("idle"));
@@ -164,22 +175,16 @@ const Player = (() => {
           audio.currentTime = s.start_ms / 1000;
           audio.play().catch(() => this.setStatus("idle"));
           this.setStatus("playing");
-          clearInterval(this.timer);
-          this.timer = setInterval(() => {
-            if (my !== this.token) return;
-            if (audio.currentTime * 1000 >= s.end_ms || audio.ended) {
-              clearInterval(this.timer);
-              audio.pause();
-              if (shadow) {
-                const gap = shadowGap(s, this.rate);
-                this.setStatus("gap");
-                this.onGap?.(i, gap);
-                this.gapTimer = setTimeout(next, gap);
-              } else {
-                next();
-              }
+          this.watchEnd(s.end_ms, my, null, () => {
+            if (shadow) {
+              const gap = shadowGap(s, this.rate);
+              this.setStatus("gap");
+              this.onGap?.(i, gap);
+              this.gapTimer = setTimeout(next, gap);
+            } else {
+              next();
             }
-          }, 50);
+          });
         };
         next();
       },

@@ -11,7 +11,7 @@
   "home.library": "콘텐츠 고르기",
   "home.library.desc": "대화 {n}편 · 수준과 관심사 순서",
   "library.title": "콘텐츠 고르기",
-  "library.desc": "긴 대화는 짧은 장면으로 나눠 장면마다 루프를 돌아요. 수준이 낮은 것부터, 같은 수준에서는 관심사가 맞는 것부터 보여 드려요.",
+  "library.desc": "시리즈별로 묶었어요. 번호를 누르면 그 과의 다음 장면부터 이어서 해요. 긴 대화는 짧은 장면으로 나눠 장면마다 루프를 돌아요.",
   "library.match": "관심사",
   "library.length": "{n}분",
   "library.sentences": "{n}문장",
@@ -191,5 +191,12 @@
   "expr.type.idiom": "관용 표현",
   "expr.type.chunk": "덩어리 표현",
   "expr.type.word": "단어",
-  "words.title": "이 장면 단어 (누르면 뜻)"
+  "words.title": "이 장면 단어 (누르면 뜻)",
+  "library.continue": "이어 하기",
+  "library.filter": "수준으로 거르기",
+  "library.level.all": "전체",
+  "library.other": "그 밖의 콘텐츠",
+  "library.next": "다음 과",
+  "library.series.progress": "{n}/{total}과 마침",
+  "library.lesson.label": "{n}과 {title}, {done}/{total}장면 마침"
 }

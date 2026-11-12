@@ -76,6 +76,18 @@ class ValidateTest(unittest.TestCase):
         c["sentences"][0]["ko"] = " "
         self.assertTrue(any("'ko'" in e for e in self.run_with(c)))
 
+    def test_series(self):
+        series = [{"id": "lle1", "title": "LLE 1", "title_ko": "기초 1단계", "kind": "course"}]
+        c = dict(copy.deepcopy(CONTENT), series="lle1", series_no=3)
+        data = {"format": 1, "licenses": [LICENSE], "series": series, "contents": [c]}
+        self.assertEqual(validate(data, self.site, "2026-11-12"), [])
+        c["series"] = "nope"                         # 없는 시리즈
+        self.assertTrue(any("시리즈" in e for e in validate(data, self.site, "2026-11-12")))
+        c2 = dict(copy.deepcopy(CONTENT), id="voa-travel-002", series="lle1", series_no=3)
+        c["series"] = "lle1"
+        data["contents"].append(c2)                  # 같은 번호가 겹침
+        self.assertTrue(any("겹칩니다" in e for e in validate(data, self.site, "2026-11-12")))
+
 
 if __name__ == "__main__":
     unittest.main()

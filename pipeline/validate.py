@@ -55,6 +55,17 @@ def validate(data: dict, site_dir: Path = SITE, today: str | None = None) -> lis
                 err(f"{where}: {key}는 YYYY-MM-DD 모양이어야 합니다")
         licenses[lid] = lic
 
+    # 시리즈 (있을 때만): 목록 화면에서 묶는 단위. course = 번호 순서로 배우는 과정, collection = 순서 없는 모음
+    series = {}
+    for i, se in enumerate(data.get("series", [])):
+        for key in ("id", "title", "title_ko", "kind"):
+            if not se.get(key):
+                err(f"series[{i}]: '{key}' 칸이 비어 있습니다")
+        if se.get("kind") and se["kind"] not in ("course", "collection"):
+            err(f"series[{i}]: kind는 course 또는 collection이어야 합니다")
+        series[se.get("id")] = se
+    series_nos = set()
+
     seen_ids = set()
     for i, c in enumerate(data.get("contents", [])):
         where = f"contents[{i}] ({c.get('id', '?')})"
@@ -83,6 +94,16 @@ def validate(data: dict, site_dir: Path = SITE, today: str | None = None) -> lis
             err(f"{where}: 라이선스 '{c.get('license_id')}'가 licenses에 없습니다. 라이선스 없는 콘텐츠는 게시할 수 없습니다")
         elif lic.get("expires_at") and lic["expires_at"] < today:
             err(f"{where}: 라이선스 '{lic['id']}'가 {lic['expires_at']}에 만료됐습니다")
+
+        if c.get("series") is not None:
+            no = c.get("series_no")
+            if c["series"] not in series:
+                err(f"{where}: 시리즈 '{c['series']}'가 series에 없습니다")
+            if not isinstance(no, int) or no < 1:
+                err(f"{where}: series_no는 1 이상의 정수여야 합니다")
+            elif (c["series"], no) in series_nos:
+                err(f"{where}: 시리즈 '{c['series']}' {no}번이 겹칩니다")
+            series_nos.add((c["series"], no))
 
         audio = c.get("audio") or {}
         duration = audio.get("duration_ms")
