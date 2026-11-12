@@ -492,3 +492,11 @@ details.series > summary:focus-visible { outline: 2px solid var(--accent); outli
 .day-group:first-of-type { border-top: 0; }
 .day-group > summary { cursor: pointer; min-height: 44px; display: flex; align-items: center; gap: 6px; }
 .day-group .card-list { margin: 4px 0 10px; }
+
+/* 복습 (2026-11-12) */
+.review-card .sent-en { margin: 4px 0; }
+.review-card .play-pill { margin-top: 2px; }
+.grade-row { margin-top: 12px; }
+.grade-buttons { display: grid; gap: 8px; }
+.grade-buttons .btn { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+.grade-next { font-size: 0.82rem; font-weight: 500; opacity: 0.85; }

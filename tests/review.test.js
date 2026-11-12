@@ -299,3 +299,18 @@ test("내 기록: 연속 공부일은 오늘(안 했으면 어제)부터 끊기�
   assert.equal(Review.loopStreak(), 0);              // 하루 빠짐
   assert.deepEqual(Object.keys(Review.getLoopLog()).sort(), ["2026-11-10", "2026-11-11", "2026-11-12"]);
 });
+
+test("복습: 담은 표현 카드는 다음 날 오늘 할 카드에 나오고, 맞히면 간격이 늘어난다", () => {
+  fresh("2026-11-12");
+  Review.addCard({ id: "c:1", content_id: "c", expr: 1, text: "give out" }, "knew");
+  Review.addCard({ id: "c:2", content_id: "c", expr: 2, text: "take on" }, "no");
+  const cards = Review.getCards();
+  assert.equal(Review.plan(cards).queue.length, 0);                 // 담은 날은 복습 차례가 아니다
+  setDate("2026-11-13");
+  assert.deepEqual(Review.plan(cards).queue.sort(), ["c:1", "c:2"]);
+  Review.record("c:1", { confidence: "sure", correct: true, quiz: "recall" });
+  assert.equal(Review.get("c:1").next_review_at, "2026-11-16");       // 상자 2 → 3일 뒤
+  Review.record("c:2", { confidence: "sure", correct: false, quiz: "recall" });
+  assert.equal(Review.get("c:2").status, "misconception");            // 확신하고 틀리면 착각
+  assert.equal(Review.get("c:2").next_review_at, "2026-11-14");
+});

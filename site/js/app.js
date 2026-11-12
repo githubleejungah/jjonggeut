@@ -61,6 +61,7 @@ const ICONS = {
   upload: "M12 20V9 M7 14l5-5 5 5 M5 4h14",
   back: "M15 6l-6 6 6 6",
   check: "M5 12.5l4.5 4.5L19 7.5",
+  cards: "M8 4h11v13H8z M5 7v13h11",
   plus: "M12 5v14 M5 12h14",
   play: "M8 5v14l11-7z",
   pause: "M8 5v14 M16 5v14",
@@ -135,7 +136,7 @@ function linkRow(href, iconName, title, desc) {
 
 function renderTopbar(home) {
   topbar.replaceChildren(home
-    ? h("h1", { class: "brand" }, h("img", { src: "img/rabbit.svg", alt: "", class: "brand-rabbit" }), t("app.name"))
+    ? h("h1", { class: "brand" }, h("img", { src: "img/rabbit.svg?v=2026111227", alt: "", class: "brand-rabbit" }), t("app.name"))
     : h("a", { class: "back", href: "#/" }, withIcon("back", t("back"))));
 }
 
@@ -246,7 +247,7 @@ function renderWelcome(step = 1, again = false) {
     app.replaceChildren(
       !again && h("p", { class: "step-label" }, t("welcome.step", { n: 1, total: 2 })),
       h("section", { class: "card welcome" },
-        h("img", { src: "img/rabbit.svg", alt: "", class: "rabbit-big" }),
+        h("img", { src: "img/rabbit.svg?v=2026111227", alt: "", class: "rabbit-big" }),
         h("h2", {}, t("welcome.sound.title")),
         h("p", { class: "muted small" }, t("welcome.sound.desc")),
         h("div", { class: "story" }, lines),
@@ -308,6 +309,7 @@ function renderHome() {
   const total = cur ? cur.c.scenes.length : 1;
   const doneSteps = cur ? scenesDone(cur.c) : 0;
   const met = Review.goalMet(Review.getCards());
+  const due = reviewDue();
   app.replaceChildren(
     h("p", { class: "tagline" }, t("app.tagline")),
     interests.length > 0 && h("p", { class: "interest-line" },
@@ -319,12 +321,15 @@ function renderHome() {
         h("div", { class: "start-text" },
           h("h2", {}, t("home.today")),
           h("p", { class: "info-line" }, cur ? t("home.scene", { title: cur.c.title_ko, k: firstOpenScene(cur.c) + 1, n: cur.c.scenes.length }) : t("home.none")),
+          due > 0 && h("p", { class: "info-line" }, h("a", { href: "#/review" }, t("home.review.due", { n: due }))),
           met && h("p", { class: "goal-line" }, icon("check"), t("home.goal.met")))),
       cur
         ? h("a", { class: "btn primary", href: `#/loop/${cur.c.id}/${firstOpenScene(cur.c) + 1}` }, ...withIcon("arrow", t("home.continue")))
         : h("a", { class: "btn primary", href: "#/library" }, ...withIcon("arrow", t("home.start")))),
     rabbitCard(),
     h("nav", { class: "link-list" },
+      linkRow("#/review", "cards", t("home.review"),
+        due > 0 ? t("home.review.desc", { n: due }) : t("home.review.none", { n: Review.getCards().length })),
       linkRow("#/library", "book", t("home.library"), t("home.library.desc", { n: state.contents.length })),
       linkRow("#/progress", "chart", t("home.progress"), t("home.progress.desc"))),
     // 정보 화면은 필요한 사람만 찾아 들어가도록 맨 아래 작은 링크로 둔다
@@ -562,12 +567,14 @@ function route() {
   const [, page, id, scene, step] = hash.split("/");
   // 루프 화면 안에서 단계만 바꿀 때는 원음 플레이어를 그대로 둔다 (같은 파일을 다시 받지 않게)
   if (!(page === "loop" && id === loopView.contentId)) cleanupLoop();
+  if (page !== "review") cleanupReview();
   else loopView.player?.stop();
   // 처음 시작 화면을 마치지 않았으면 먼저 그것부터 (정보 화면은 언제든 볼 수 있게 예외)
   if (!Review.getSettings().onboarded && hash !== "#/about") renderWelcome(1);
   else if (hash === "#/about") renderAbout();
   else if (hash === "#/progress") renderProgress();
   else if (hash === "#/rabbits") renderRabbits();
+  else if (hash === "#/review") renderReview();
   else if (hash === "#/story") renderWelcome(1, true);
   else if (hash === "#/interests") renderInterests();
   else if (page === "library") renderLibrary();
@@ -594,7 +601,7 @@ function inAppNotice() {
 /* ---------- 시작 ---------- */
 applyTheme(Review.getSettings().theme);   // 문구를 받기 전에 먼저 색을 입혀 깜빡임을 줄인다
 const getJSON = (url) => fetch(url).then((r) => { if (!r.ok) throw new Error(`${url} ${r.status}`); return r.json(); });
-Promise.all([getJSON("i18n/ko.json?v=2026111224"), getJSON("data/contents.json?v=2026111222")])
+Promise.all([getJSON("i18n/ko.json?v=2026111225"), getJSON("data/contents.json?v=2026111222")])
   .then(([text, data]) => {
     state.text = text;
     state.contents = data.contents ?? [];

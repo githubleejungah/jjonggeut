@@ -8,7 +8,9 @@
    ========================================================= */
 
 const Rabbit = (() => {
-  const LINE = "#E3D6C3", FUR = "#FFFDF7", INK = "#3A3030", EAR = "#F8C9D2", BLUSH = "#F8B9C4", NOSE = "#E89AAA";
+  // 화풍 (2026-11-12 사용자 의견): 선이 약하다 → 진한 밤색 두꺼운 선, 세로로 긴 타원 눈.
+  // 다른 작가의 캐릭터를 따라 그리지 않고 '두꺼운 선·단순한 눈' 같은 일반적인 화풍만 참고했다
+  const LINE = "#3B2E2A", SW = 3.2, FUR = "#FFFDF7", INK = "#2E2422", EAR = "#F6C3CC", BLUSH = "#F7B3BF", NOSE = "#C98B86";
   const MAX_CHUB = 3;
 
   /* ---------- 몸 ---------- */
@@ -20,7 +22,7 @@ const Rabbit = (() => {
 
   function body(g) {
     const { rx, ry, cheekX, cheekR, footX } = g;
-    return `<g stroke="${LINE}" stroke-width="1.2" fill="${FUR}">
+    return `<g stroke="${LINE}" stroke-width="${SW}" stroke-linejoin="round" fill="${FUR}">
       <ellipse cx="-16" cy="-46" rx="9" ry="16" transform="rotate(-12 -16 -46)"/>
       <ellipse cx="16" cy="-46" rx="9" ry="16" transform="rotate(12 16 -46)"/>
       <ellipse cx="${-footX}" cy="37" rx="10" ry="5"/><ellipse cx="${footX}" cy="37" rx="10" ry="5"/>
@@ -28,25 +30,25 @@ const Rabbit = (() => {
       <circle cx="${-cheekX}" cy="7" r="${cheekR}"/><circle cx="${cheekX}" cy="7" r="${cheekR}"/></g>
     <ellipse cx="-16" cy="-44" rx="4" ry="9" transform="rotate(-12 -16 -44)" fill="${EAR}"/>
     <ellipse cx="16" cy="-44" rx="4" ry="9" transform="rotate(12 16 -44)" fill="${EAR}"/>
-    <g fill="${FUR}"><ellipse cx="0" cy="0" rx="${rx - 1.2}" ry="${ry - 1.2}"/>
-      <circle cx="${-cheekX}" cy="7" r="${cheekR - 1.2}"/><circle cx="${cheekX}" cy="7" r="${cheekR - 1.2}"/></g>`;
+    <g fill="${FUR}"><ellipse cx="0" cy="0" rx="${rx - SW / 2}" ry="${ry - SW / 2}"/>
+      <circle cx="${-cheekX}" cy="7" r="${cheekR - SW / 2}"/><circle cx="${cheekX}" cy="7" r="${cheekR - SW / 2}"/></g>`;
   }
 
   function face(g, kind) {
     const blush = kind === "calm" ? "" :
       `<ellipse cx="${-g.blushX}" cy="6" rx="6" ry="3.4" fill="${BLUSH}"/><ellipse cx="${g.blushX}" cy="6" rx="6" ry="3.4" fill="${BLUSH}"/>`;
     const eyes = kind === "sick"
-      ? `<path d="M-18 -9 L-11 -6 M-18 -5 L-11 -6 M18 -9 L11 -6 M18 -5 L11 -6" fill="none" stroke="${INK}" stroke-width="1.5" stroke-linecap="round"/>`
+      ? `<path d="M-18 -9 L-11 -6 M-18 -5 L-11 -6 M18 -9 L11 -6 M18 -5 L11 -6" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>`
       : kind === "calm"
-      ? `<path d="M-18 -7 Q-14 -4 -10 -7 M10 -7 Q14 -4 18 -7" fill="none" stroke="${INK}" stroke-width="1.6" stroke-linecap="round"/>`
-      : `<circle cx="-14" cy="-8" r="3.5" fill="${INK}"/><circle cx="14" cy="-8" r="3.5" fill="${INK}"/>
-         <circle cx="-13" cy="-9" r="1.2" fill="#FFF"/><circle cx="15" cy="-9" r="1.2" fill="#FFF"/>`;
+      ? `<path d="M-18 -7 Q-14 -4 -10 -7 M10 -7 Q14 -4 18 -7" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round"/>`
+      : `<ellipse cx="-14" cy="-7" rx="3.6" ry="5" fill="${INK}"/><ellipse cx="14" cy="-7" rx="3.6" ry="5" fill="${INK}"/>`;
     const mouth = kind === "sick"
       ? `<path d="M-4 6 Q-2 4 0 6 Q2 8 4 6" fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/>`
       : kind === "chew"
       ? `<path d="M0 1.5 L0 3.5" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/><ellipse cx="0" cy="6" rx="2.6" ry="2" fill="${INK}"/>`
-      : `<path d="M0 1.5 L0 4 M-4 5.5 Q-2 8 0 4 Q2 8 4 5.5" fill="none" stroke="${INK}" stroke-width="1.2" stroke-linecap="round"/>`;
-    return `${eyes}${blush}<ellipse cx="0" cy="0" rx="2.4" ry="1.6" fill="${NOSE}"/>${mouth}`;
+      : `<path d="M0 2.6 L0 4.4 M-4.4 5.8 Q-2.2 8.6 0 4.4 Q2.2 8.6 4.4 5.8" fill="none" stroke="${INK}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>`;
+    const nose = `<path d="M-3 0 Q0 -1.4 3 0 Q1.4 2.4 0 2.6 Q-1.4 2.4 -3 0 Z" fill="${NOSE}" stroke="${LINE}" stroke-width="0.8" stroke-linejoin="round"/>`;
+    return `${eyes}${blush}${nose}${mouth}`;
   }
 
   /* ---------- 간식 · 운동 ---------- */
@@ -168,6 +170,9 @@ const Rabbit = (() => {
       <circle cx="41" cy="-60" r="5.5" fill="#FBFAF7" stroke="#E2DDD3"/>` },
   };
 
+  const inked = (str) => str.replace(/stroke="#[0-9A-Fa-f]{3,6}" stroke-width="0\.[4-9]"/g, `stroke="${LINE}" stroke-width="1.6"`)
+    .replace(/stroke="#(?:CDB27A|C9D3DD|CDBFAF|D8C69A|E2DDD3|E3D6C3|A9C3DA|D6D0C6)"(?! stroke-width)/g, `stroke="${LINE}" stroke-width="1.6"`);
+
   // 토끼 SVG 문자열. opts: { chub, wear, face: "smile"|"chew"|"calm", snack: 번호|null, workout: bool, label }
   function svg({ chub = 0, wear = null, face: kind = null, snack: snackNo = null, workout: work = false, sick = false, label = "토끼" } = {}) {
     const g = geom(chub);
@@ -176,8 +181,8 @@ const Rabbit = (() => {
     const faceKind = kind ?? w.face ?? (snackNo !== null ? "chew" : "smile");
     const W = g.cheekX + g.cheekR + 30;
     return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-W} -80 ${2 * W} 130" role="img" aria-label="${label}">`
-      + (w.back?.(g) ?? "") + body(g) + face(g, faceKind) + (w.front?.(g) ?? "")
-      + (work ? workout(g) : "") + (snackNo !== null ? snack(g, snackNo) : "") + "</svg>";
+      + inked(w.back?.(g) ?? "") + body(g) + face(g, faceKind) + inked(w.front?.(g) ?? "")
+      + inked((work ? workout(g) : "") + (snackNo !== null ? snack(g, snackNo) : "")) + "</svg>";
   }
 
   // 배탈 나서 누운 토끼 (정면에서 본 모습): 베개를 베고, 이마에 얼음주머니, 이불은 볼 아래까지
@@ -186,14 +191,14 @@ const Rabbit = (() => {
     const bw = g.cheekX + g.cheekR + 8;
     let stripes = "";
     for (let x = -bw + 14; x < bw - 6; x += 16) stripes += `<path d="M${x} 26 L${x} 48" stroke="#E6EFF7" stroke-width="3"/>`;
-    return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-W} -80 ${2 * W} 130" role="img" aria-label="${label}">`
+    return inked(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-W} -80 ${2 * W} 130" role="img" aria-label="${label}">`
       + `<rect x="${-bw - 4}" y="-58" width="${2 * bw + 8}" height="44" rx="20" fill="#F3EEE6" stroke="#E3D6C3"/>`
       + body(g) + face(g, "sick")
       + `<ellipse cx="0" cy="-33" rx="15" ry="6.5" fill="#BFE0F2" stroke="#9CC0E6" stroke-width="0.8"/>`
       + `<path d="M-6 -36 q6 -3 12 0" stroke="#E6F3FA" stroke-width="1.6" fill="none" stroke-linecap="round"/>`
       + `<path d="M${-bw} 22 Q0 12 ${bw} 22 L${bw} 50 L${-bw} 50 Z" fill="#CFE0EE" stroke="#A9C3DA" stroke-width="0.8"/>`
       + stripes
-      + `<path d="M${-bw} 22 Q0 12 ${bw} 22" fill="none" stroke="#FBFAF7" stroke-width="5" stroke-linecap="round"/></svg>`;
+      + `<path d="M${-bw} 22 Q0 12 ${bw} 22" fill="none" stroke="#FBFAF7" stroke-width="5" stroke-linecap="round"/></svg>`);
   }
 
   // 화면에 넣을 요소. 그림 높이를 정하면 살찐 만큼 가로가 넓어진다
