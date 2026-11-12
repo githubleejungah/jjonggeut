@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- 시범판은 링크를 아는 사람만 본다. 검색 엔진에 뜨지 않게 한다. 넓게 공개할 때 지운다. -->
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="description" content="듣고, 표현을 모으고, 따라 말하고, 다시 떠올리는 영어 습관">
+  <meta name="theme-color" content="#a8475f">
+  <title>쫑긋 · 영어 습관</title>
+  <link rel="icon" href="img/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="img/icon.svg">
+  <!-- ?v=… : 파일을 고치면 이 값을 올린다. 브라우저가 예전 파일(캐시)을 쓰지 않게 하는 장치 (캐시 버스팅) -->
+  <link rel="stylesheet" href="css/style.css?v=2026111206">
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar" id="topbar"></header>
+    <!-- 화면 내용은 app.js가 주소(#/...)에 따라 이 자리에 그린다 -->
+    <main id="app" aria-live="polite">
+      <p class="muted">불러오는 중…</p>
+    </main>
+  </div>
+
+  <!-- 순서가 중요하다: 규칙(review.js)과 음성(speech.js)을 먼저 불러야 화면(app.js)이 쓸 수 있다 -->
+  <script src="js/review.js?v=2026111206"></script>
+  <script src="js/speech.js?v=2026111202"></script>
+  <script src="js/app.js?v=2026111206"></script>
+</body>
+</html>

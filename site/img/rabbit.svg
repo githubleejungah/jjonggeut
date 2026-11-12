@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-60 -66 120 112" role="img" aria-label="귀가 작은 통통한 토끼">
+  <!-- 쫑긋 축하 캐릭터 시안 2판 (2026-11-12): 늘어진 귀 시안의 몸·볼살 + 짧은 귀. 출시용 그림은 따로 다듬는다 -->
+  <g stroke="#E3D6C3" stroke-width="1.2" fill="#FFFDF7">
+    <ellipse cx="-16" cy="-46" rx="9" ry="16" transform="rotate(-12 -16 -46)"/>
+    <ellipse cx="16" cy="-46" rx="9" ry="16" transform="rotate(12 16 -46)"/>
+    <ellipse cx="-18" cy="37" rx="10" ry="5"/>
+    <ellipse cx="18" cy="37" rx="10" ry="5"/>
+    <ellipse cx="0" cy="0" rx="48" ry="38"/>
+    <circle cx="-34" cy="7" r="16"/>
+    <circle cx="34" cy="7" r="16"/>
+  </g>
+  <ellipse cx="-16" cy="-44" rx="4" ry="9" transform="rotate(-12 -16 -44)" fill="#F8C9D2"/>
+  <ellipse cx="16" cy="-44" rx="4" ry="9" transform="rotate(12 16 -44)" fill="#F8C9D2"/>
+  <g fill="#FFFDF7">
+    <ellipse cx="0" cy="0" rx="46.8" ry="36.8"/>
+    <circle cx="-34" cy="7" r="14.8"/>
+    <circle cx="34" cy="7" r="14.8"/>
+  </g>
+  <circle cx="-14" cy="-8" r="3.5" fill="#3A3030"/>
+  <circle cx="14" cy="-8" r="3.5" fill="#3A3030"/>
+  <circle cx="-13" cy="-9" r="1.2" fill="#FFFFFF"/>
+  <circle cx="15" cy="-9" r="1.2" fill="#FFFFFF"/>
+  <ellipse cx="-23" cy="6" rx="6" ry="3.4" fill="#F8B9C4"/>
+  <ellipse cx="23" cy="6" rx="6" ry="3.4" fill="#F8B9C4"/>
+  <ellipse cx="0" cy="0" rx="2.4" ry="1.6" fill="#E89AAA"/>
+  <path d="M0 1.5 L0 4 M-4 5.5 Q-2 8 0 4 Q2 8 4 5.5" fill="none" stroke="#3A3030" stroke-width="1.2" stroke-linecap="round"/>
+</svg>

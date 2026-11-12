@@ -1,0 +1,245 @@
+// 학습 기록 규칙 시험 (단위 테스트, Unit Test: 작은 부분 하나를 따로 떼어 확인하는 시험)
+// 실행: node --test tests/
+const test = require("node:test");
+const assert = require("node:assert/strict");
+const Review = require("../site/js/review.js");
+
+// 시험마다 빈 저장소와 정해진 날짜로 시작한다
+function fresh(date = "2026-11-10") {
+  const mem = new Map();
+  Review.useStore({ get: (k) => mem.get(k) ?? null, set: (k, v) => mem.set(k, v) });
+  const [y, m, d] = date.split("-").map(Number);
+  Review.useClock(() => new Date(y, m - 1, d, 9, 0));
+  return mem;
+}
+const setDate = (date) => {
+  const [y, m, d] = date.split("-").map(Number);
+  Review.useClock(() => new Date(y, m - 1, d, 9, 0));
+};
+
+test("5단계 상태: 확신도 × 정답", () => {
+  assert.equal(Review.classify("sure", true), "known");
+  assert.equal(Review.classify("sure", false), "misconception");
+  assert.equal(Review.classify("unsure", true), "shaky");
+  assert.equal(Review.classify("unsure", false), "confused");
+  assert.equal(Review.classify("dontknow", false), "unknown");
+});
+
+test("상자 이동: 앎은 한 칸 올림, 장기 기억(7)에서 멈춤", () => {
+  assert.equal(Review.nextBox(0, "known"), 1);
+  assert.equal(Review.nextBox(6, "known"), 7);
+  assert.equal(Review.nextBox(7, "known"), 7);
+});
+
+test("상자 이동: 불안한 앎은 그대로, 틀리면 1번 / 상자 4 이상이면 두 칸만", () => {
+  assert.equal(Review.nextBox(3, "shaky"), 3);
+  assert.equal(Review.nextBox(0, "shaky"), 1);
+  assert.equal(Review.nextBox(3, "confused"), 1);
+  assert.equal(Review.nextBox(5, "misconception"), 3);
+  assert.equal(Review.nextBox(7, "unknown"), 5);
+});
+
+test("복습 간격: 1·3·7·14·30·60일, 장기 기억 120일 (쫑긋 학습법 문서 기준)", () => {
+  assert.deepEqual([1, 2, 3, 4, 5, 6, 7].map(Review.intervalFor), [1, 3, 7, 14, 30, 60, 120]);
+});
+
+test("하루는 새벽 4시에 바뀐다: 새벽 1시 공부는 전날 기록", () => {
+  fresh();
+  Review.useClock(() => new Date(2026, 10, 13, 1, 30));     // 11월 13일 01:30
+  assert.equal(Review.today(), "2026-11-12");
+  Review.useClock(() => new Date(2026, 10, 13, 4, 0));      // 11월 13일 04:00
+  assert.equal(Review.today(), "2026-11-13");
+  Review.useClock(() => new Date(2026, 11, 1, 3, 59));      // 12월 1일 03:59 → 달이 넘어가도 전날
+  assert.equal(Review.today(), "2026-11-30");
+});
+
+test("기록: 처음 맞히면 상자 1, 다음 복습은 내일", () => {
+  fresh();
+  const r = Review.record("webhook", { confidence: "sure", correct: true });
+  assert.equal(r.status, "known");
+  assert.equal(r.record.box, 1);
+  assert.equal(r.record.next_review_at, "2026-11-11");
+  assert.equal(r.firstToday, true);
+});
+
+test("오늘 기록: 틀렸다가 다시 맞히면 '바로잡은 것'", () => {
+  fresh();
+  Review.record("oauth", { confidence: "sure", correct: false });
+  let t = Review.getToday();
+  assert.deepEqual(t.misconceptions, ["oauth"]);
+  const again = Review.record("oauth", { confidence: "unsure", correct: true });
+  assert.equal(again.firstToday, false);              // 같은 날 두 번째는 목표 개수에 다시 세지 않음
+  t = Review.getToday();
+  assert.deepEqual(t.corrected, ["oauth"]);
+  assert.equal(t.seen.length, 1);
+});
+
+test("장기 기억: 상자 5(30일) 이상에서 맞히면 표시", () => {
+  const mem = fresh();
+  mem.set("jg:v1:review:api", JSON.stringify({ box: 5, lapses: 0, history: [], status: "known" }));
+  const r = Review.record("api", { confidence: "sure", correct: true });
+  assert.equal(r.record.box, 6);
+  assert.equal(r.record.long_term_at, "2026-11-10");
+});
+
+test("날짜가 바뀌면 오늘 기록이 새로 시작", () => {
+  fresh();
+  Review.record("json", { confidence: "sure", correct: true });
+  setDate("2026-11-11");
+  assert.equal(Review.getToday().seen.length, 0);
+});
+
+test("오늘 할 카드: 복습 예정(급한 순) 먼저, 남는 자리에 새 카드, 목표 개수까지", () => {
+  const mem = fresh("2026-11-12");
+  const terms = ["a", "b", "c", "d", "e"].map((id) => ({ id, stage: "design", level: 2 }));
+  mem.set("jg:v1:settings", JSON.stringify({ daily_goal: 3 }));
+  mem.set("jg:v1:review:a", JSON.stringify({ box: 2, status: "known", next_review_at: "2026-11-12", history: [], lapses: 0 }));
+  mem.set("jg:v1:review:b", JSON.stringify({ box: 1, status: "misconception", next_review_at: "2026-11-12", history: [], lapses: 0 }));
+  mem.set("jg:v1:review:c", JSON.stringify({ box: 3, status: "known", next_review_at: "2026-11-20", history: [], lapses: 0 }));
+  const p = Review.plan(terms);
+  assert.deepEqual(p.queue, ["b", "a", "d"]);          // 착각 b → 복습 a → 새 카드 d (c는 아직 날짜 안 됨)
+  assert.equal(p.reviewCount, 2);
+  assert.equal(p.newCount, 1);
+});
+
+test("확인 문제: 보기 4개, 정답 1개, 혼동 쌍이 오답 보기에 꼭 들어감", () => {
+  fresh();
+  const terms = ["poc", "mvp", "x1", "x2", "x3", "x4"].map((id) => ({ id, stage: "discovery", level: 3 }));
+  const pairs = [{ a: "poc", b: "mvp" }];
+  for (let i = 0; i < 20; i++) {
+    const q = Review.makeQuiz(terms[0], terms, pairs);
+    assert.equal(q.options.length, 4);
+    assert.equal(q.options.filter((o) => o.correct).length, 1);
+    assert.ok(q.options.some((o) => o.id === "mvp"));
+  }
+});
+
+test("확인 문제 종류: 상자 3부터는 뜻 → 용어 고르기", () => {
+  const mem = fresh();
+  const terms = ["t1", "t2", "t3", "t4"].map((id) => ({ id, stage: "build", level: 2 }));
+  assert.equal(Review.makeQuiz(terms[0], terms, []).kind, "def");
+  mem.set("jg:v1:review:t1", JSON.stringify({ box: 3, history: [], lapses: 0 }));
+  assert.equal(Review.makeQuiz(terms[0], terms, []).kind, "term");
+});
+
+// ----- 날짜별 일지와 성장 통계 (2026-11-11 추가) -----
+const T = (id, stage = "build") => ({ id, stage });
+
+test("일지: 날짜가 바뀌어도 지난 날 기록이 남는다", () => {
+  fresh("2026-11-10");
+  Review.record("api", { confidence: "sure", correct: true });
+  Review.record("poc", { confidence: "sure", correct: false });
+  setDate("2026-11-11");
+  Review.record("poc", { confidence: "sure", correct: true });
+  const log = Review.getLog();
+  assert.deepEqual(log["2026-11-10"].seen, ["api", "poc"]);
+  assert.deepEqual(log["2026-11-10"].new, ["api", "poc"]);
+  assert.deepEqual(log["2026-11-10"].misconceptions, ["poc"]);
+  assert.deepEqual(log["2026-11-11"].seen, ["poc"]);
+  assert.deepEqual(log["2026-11-11"].new, []);            // 다시 본 것은 새 용어가 아님
+  assert.equal(Review.get("poc").first_at, "2026-11-10");
+});
+
+test("일지 되살리기: 일지가 없던 때의 이력으로 날짜별 기록을 만든다", () => {
+  const mem = fresh("2026-11-08");
+  Review.record("api", { confidence: "unsure", correct: false });
+  setDate("2026-11-09");
+  Review.record("api", { confidence: "sure", correct: true });
+  // 일지가 생기기 전 상태로 만들기: 일지와 first_at 지우기
+  mem.delete("jg:v1:log");
+  const rec = JSON.parse(mem.get("jg:v1:review:api"));
+  delete rec.first_at;
+  mem.set("jg:v1:review:api", JSON.stringify(rec));
+
+  assert.equal(Review.ensureLog(["api", "poc"]), true);
+  const log = Review.getLog();
+  assert.deepEqual(log["2026-11-08"].new, ["api"]);
+  assert.deepEqual(log["2026-11-08"].wrong, ["api"]);
+  assert.deepEqual(log["2026-11-09"].seen, ["api"]);
+  assert.equal(Review.ensureLog(["api"]), false);        // 한 번만 한다
+});
+
+test("성장 통계: 연속 공부일, 누적, 단계별", () => {
+  fresh("2026-11-09");
+  Review.record("api", { confidence: "sure", correct: true });
+  setDate("2026-11-10");
+  Review.record("poc", { confidence: "sure", correct: true });
+  setDate("2026-11-11");
+  Review.record("mvp", { confidence: "dontknow", correct: false });
+  const s = Review.stats([T("api"), T("poc", "discovery"), T("mvp", "discovery"), T("kpi", "discovery")]);
+  assert.equal(s.studyDays, 3);
+  assert.equal(s.streak, 3);
+  assert.equal(s.seenTerms, 3);
+  assert.deepEqual(s.cumulative.map((c) => c.seen), [1, 2, 3]);
+  assert.deepEqual(s.byStage.discovery, { total: 3, seen: 2, known: 1, longTerm: 0 });
+  setDate("2026-11-13");                                   // 하루 건너뜀
+  assert.equal(Review.stats([T("api")]).streak, 0);
+});
+
+test("백업: 내보낸 기록을 빈 저장소에 가져오면 그대로 돌아온다", () => {
+  const mem = fresh("2026-11-11");
+  Review.useStore({ get: (k) => mem.get(k) ?? null, set: (k, v) => mem.set(k, v), keys: () => [...mem.keys()] });
+  Review.record("api", { confidence: "sure", correct: true });
+  const backup = JSON.parse(JSON.stringify(Review.exportAll()));
+  const mem2 = new Map();
+  Review.useStore({ get: (k) => mem2.get(k) ?? null, set: (k, v) => mem2.set(k, v), keys: () => [...mem2.keys()] });
+  assert.ok(Review.importAll(backup) >= 3);
+  assert.equal(Review.get("api").status, "known");
+  assert.throws(() => Review.importAll({ app: "other" }));
+});
+
+// ----- 오늘의 마무리 (2026-11-11 추가) -----
+test("마무리: 착각·틀림을 먼저 담고, 맞힌 카드로 끝낸다", () => {
+  fresh("2026-11-11");
+  Review.record("api", { confidence: "sure", correct: true });
+  Review.record("poc", { confidence: "sure", correct: false });        // 착각
+  Review.record("mvp", { confidence: "unsure", correct: false });      // 헷갈림
+  Review.record("kpi", { confidence: "sure", correct: true });
+  const pairs = [{ a: "api", b: "sdk" }];
+  const plan = Review.planWrap(pairs, () => 0.3);
+  assert.ok(plan.includes("poc") && plan.includes("mvp"));
+  assert.ok(["api", "kpi"].includes(plan.at(-1)));                     // 마지막은 맞힌 카드
+  assert.equal(new Set(plan).size, plan.length);                       // 중복 없음
+});
+
+test("마무리: 복습 상자는 바꾸지 않고, 다시 맞히면 바로잡은 것으로 센다", () => {
+  fresh("2026-11-11");
+  Review.record("poc", { confidence: "sure", correct: false });
+  const before = Review.get("poc");
+  Review.practice("poc", true);
+  assert.deepEqual(Review.get("poc"), before);
+  assert.deepEqual(Review.getToday().corrected, ["poc"]);
+  assert.deepEqual(Review.getLog()["2026-11-11"].corrected, ["poc"]);
+  Review.markWrapped(["poc"]);
+  assert.deepEqual(Review.planWrap([]), []);                           // 이미 마무리한 것은 다시 내지 않음
+});
+
+test("마무리: 본 카드가 적고 틀린 것도 없으면 건너뛴다", () => {
+  fresh("2026-11-11");
+  Review.record("api", { confidence: "sure", correct: true });
+  assert.deepEqual(Review.planWrap([]), []);
+});
+
+// ----- 새 카드 최소 자리와 섞기 (2026-11-12 추가) -----
+test("복습이 목표만큼 쌓여도 새 카드 3장은 나오고, 복습 2장마다 새 카드 1장씩 섞인다", () => {
+  fresh("2026-11-11");
+  const terms = Array.from({ length: 30 }, (_, i) => ({ id: `t${i}`, stage: "build", level: 2 }));
+  for (let i = 0; i < 12; i++) Review.record(`t${i}`, { confidence: "sure", correct: true });  // 내일 복습 12장
+  setDate("2026-11-12");
+  const p = Review.plan(terms);
+  assert.equal(p.queue.length, 10);
+  assert.equal(p.newCount, 3);
+  assert.equal(p.reviewCount, 7);
+  const kinds = p.queue.map((id) => (Number(id.slice(1)) < 12 ? "R" : "N")).join("");
+  assert.equal(kinds, "RRNRRNRRNR");
+});
+
+test("복습이 목표의 2배 넘게 밀리면 새 카드는 1장만", () => {
+  fresh("2026-11-11");
+  const terms = Array.from({ length: 40 }, (_, i) => ({ id: `t${i}`, stage: "build", level: 2 }));
+  for (let i = 0; i < 25; i++) Review.record(`t${i}`, { confidence: "sure", correct: true });
+  setDate("2026-11-12");
+  const p = Review.plan(terms);
+  assert.equal(p.newCount, 1);
+  assert.equal(p.reviewCount, 9);
+});

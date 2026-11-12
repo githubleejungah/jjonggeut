@@ -1,0 +1,48 @@
+# main에 올릴 때마다: 종합 점검(시험·문법·문구·캐시 번호 등) → 통과하면 site/ 폴더만 GitHub Pages로 배포
+# 점검이 실패하면 배포하지 않는다.
+# 참고: 점검은 통과했는데 배포만 "No artifacts named github-pages"로 실패하면 GitHub 쪽 오류다.
+#       빈 커밋을 올리거나 Actions 화면에서 다시 실행하면 된다 (필드워드 교훈 18).
+name: 점검 후 배포
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - name: 종합 점검
+        run: python pipeline/check.py
+
+  deploy:
+    needs: check
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
